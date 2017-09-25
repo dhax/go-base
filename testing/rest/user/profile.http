@@ -1,0 +1,15 @@
+
+GET {{host}}/api/profile
+Authorization: {{jwtUser}}
+###
+PUT {{host}}/api/profile
+Authorization: {{jwtUser}}
+
+{
+    "email": "invalid",
+    "name": "test"
+}
+###
+DELETE {{host}}/api/profile
+Authorization: {{jwtUser}}
+###

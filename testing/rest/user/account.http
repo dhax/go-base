@@ -1,0 +1,33 @@
+GET {{host}}/api/account
+Authorization: {{jwtUser}}
+###
+PUT {{host}}/api/account
+Authorization: {{jwtUser}}
+
+{
+    "email": "user@boot.io",
+    "name": "User Boot",
+    "active": false,
+    "roles": ["user", "admin"]
+}
+###
+DELETE {{host}}/api/account
+Authorization: {{jwtUser}}
+###
+PUT {{host}}/api/account/token/3
+Authorization: {{jwtUser}}
+
+{
+    "identifier": "my token identifier"
+}
+###
+DELETE {{host}}/api/account/token/1
+Authorization: {{jwtUser}}
+###
+PUT {{host}}/api/account/profile
+Authorization: {{jwtUser}}
+
+{
+    "id": 3,
+    "theme": "dark"
+}

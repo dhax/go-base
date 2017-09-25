@@ -1,0 +1,12 @@
+{{define "loginToken"}}
+{{template "header"}}
+
+<p>Hello {{.Name}},</p>
+<p>Click here to login with this device</p>
+<p><a href="{{.URL}}" class="btn-primary">Login Now</a></p>
+<p>Or enter this token on login page from another device:</p>
+<p>{{.Token}}</p>
+<p>Link and token are valid one time only for next {{.Expiry | formatAsDuration}}.</p>
+
+{{template "footer"}}
+{{end}}

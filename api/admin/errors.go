@@ -1,0 +1,81 @@
+package admin
+
+import (
+	"encoding/json"
+	"net/http"
+
+	"github.com/go-chi/render"
+)
+
+// ErrResponse renderer type for handling all sorts of errors.
+type ErrResponse struct {
+	Err            error `json:"-"` // low-level runtime error
+	HTTPStatusCode int   `json:"-"` // http response status code
+
+	StatusText string `json:"status"`          // user-level status message
+	AppCode    int64  `json:"code,omitempty"`  // application-specific error code
+	ErrorText  string `json:"error,omitempty"` // application-level error message, for debugging
+}
+
+// Render sets the application-specific error code in AppCode.
+func (e *ErrResponse) Render(w http.ResponseWriter, r *http.Request) error {
+	render.Status(r, e.HTTPStatusCode)
+	return nil
+}
+
+// ErrInvalidRequest returns status 422 Unprocessable Entity including error message.
+func ErrInvalidRequest(err error) render.Renderer {
+	return &ErrResponse{
+		Err:            err,
+		HTTPStatusCode: http.StatusUnprocessableEntity,
+		StatusText:     http.StatusText(http.StatusUnprocessableEntity),
+		ErrorText:      err.Error(),
+	}
+}
+
+// ErrRender returns status 422 Unprocessable Entity rendering response error.
+func ErrRender(err error) render.Renderer {
+	return &ErrResponse{
+		Err:            err,
+		HTTPStatusCode: http.StatusUnprocessableEntity,
+		StatusText:     "Error rendering response.",
+		ErrorText:      err.Error(),
+	}
+}
+
+// ErrValidationResponse renderer for handling validation errors.
+type ErrValidationResponse struct {
+	*ErrResponse
+	Errors string `json:"errors,omitempty"`
+}
+
+// Render sets the application-specific error code in AppCode.
+func (ev *ErrValidationResponse) Render(w http.ResponseWriter, r *http.Request) error {
+	render.Status(r, ev.ErrResponse.HTTPStatusCode)
+	return nil
+}
+
+// ErrValidation returns status 422 Unprocessable Entity stating validation errors.
+func ErrValidation(err error, valErrors error) render.Renderer {
+	b, _ := json.Marshal(valErrors)
+	return &ErrValidationResponse{
+		&ErrResponse{
+			Err:            err,
+			HTTPStatusCode: http.StatusUnprocessableEntity,
+			StatusText:     http.StatusText(http.StatusUnprocessableEntity),
+			ErrorText:      err.Error(),
+		},
+		string(b),
+	}
+}
+
+var (
+	// ErrBadRequest return status 400 Bad Request for malformed request body.
+	ErrBadRequest = &ErrResponse{HTTPStatusCode: http.StatusBadRequest, StatusText: http.StatusText(http.StatusBadRequest)}
+
+	// ErrNotFound returns status 404 Not Found for invalid resource request.
+	ErrNotFound = &ErrResponse{HTTPStatusCode: http.StatusNotFound, StatusText: http.StatusText(http.StatusNotFound)}
+
+	// ErrInternalServerError returns status 500 Internal Server Error.
+	ErrInternalServerError = &ErrResponse{HTTPStatusCode: http.StatusInternalServerError, StatusText: http.StatusText(http.StatusInternalServerError)}
+)

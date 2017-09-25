@@ -1,0 +1,44 @@
+GET {{host}}/admin
+Authorization: {{jwtAdmin}}
+###
+POST {{host}}/admin/accounts
+Authorization: {{jwtAdmin}}
+
+{
+    "email": "user@boot.io",
+    "name": "duplicate user",
+    "active": true,
+    "roles": ["user"]
+}
+###
+GET {{host}}/admin/accounts/2
+Authorization: {{jwtAdmin}}
+###
+PUT {{host}}/admin/accounts/2
+Authorization: {{jwtAdmin}}
+
+{
+    "email": "user@boot.io",
+    "name": "TEST USER",
+    "roles": ["user"]
+}
+###
+DELETE {{host}}/admin/accounts/2
+Authorization: {{jwtAdmin}}
+###
+POST {{host}}/admin/accounts
+Authorization: {{jwtAdmin}}
+
+{
+    "email": "{{$timestamp}}@mail.io",
+    "name": "test user",
+    "active": true,
+    "roles": ["admin","user"]
+}
+###
+GET {{host}}/admin/accounts?limit=3&page=1&order=id desc
+Authorization: {{jwtAdmin}}
+###
+GET {{host}}/admin/accounts?email__match=%@boot.io
+Authorization: {{jwtAdmin}}
+###

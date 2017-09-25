@@ -1,0 +1,16 @@
+language: golang
+
+go:
+  - 1.4
+
+env:
+  global:
+  - GOPATH="$HOME/gopath"
+  - PATH="$HOME/gopath/bin:$HOME/bin:$PATH"
+
+install:
+ - go get github.com/gorilla/css/scanner
+ - go get github.com/stretchr/testify/assert
+
+script:
+  - go test -v 

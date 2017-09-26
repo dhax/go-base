@@ -1,20 +1,20 @@
 package auth
 
 import (
-	"math/rand"
-	"time"
+	"crypto/rand"
 )
-
-func init() {
-	rand.Seed(time.Now().UnixNano())
-}
 
 const letterBytes = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 
 func randStringBytes(n int) string {
-	b := make([]byte, n)
-	for i := range b {
-		b[i] = letterBytes[rand.Intn(len(letterBytes))]
+	buf := make([]byte, n)
+	_, err := rand.Read(buf)
+	if err != nil {
+		panic(err)
 	}
-	return string(b)
+
+	for k, v := range buf {
+		buf[k] = letterBytes[v%byte(len(letterBytes))]
+	}
+	return string(buf)
 }

@@ -145,12 +145,12 @@ func (d *tokenRequest) Bind(r *http.Request) error {
 func (rs *AccountResource) updateToken(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(chi.URLParam(r, "tokenID"))
 	if err != nil {
-		render.Respond(w, r, ErrBadRequest)
+		render.Render(w, r, ErrBadRequest)
 		return
 	}
 	data := &tokenRequest{}
 	if err := render.Bind(r, data); err != nil {
-		render.Respond(w, r, ErrInvalidRequest(err))
+		render.Render(w, r, ErrInvalidRequest(err))
 		return
 	}
 	acc := r.Context().Value(ctxAccount).(*models.Account)
@@ -160,7 +160,7 @@ func (rs *AccountResource) updateToken(w http.ResponseWriter, r *http.Request) {
 				ID:         t.ID,
 				Identifier: data.Identifier,
 			}); err != nil {
-				render.Respond(w, r, ErrInvalidRequest(err))
+				render.Render(w, r, ErrInvalidRequest(err))
 				return
 			}
 		}
@@ -171,7 +171,7 @@ func (rs *AccountResource) updateToken(w http.ResponseWriter, r *http.Request) {
 func (rs *AccountResource) deleteToken(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(chi.URLParam(r, "tokenID"))
 	if err != nil {
-		render.Respond(w, r, ErrBadRequest)
+		render.Render(w, r, ErrBadRequest)
 		return
 	}
 	acc := r.Context().Value(ctxAccount).(*models.Account)

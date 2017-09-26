@@ -4,15 +4,30 @@
 Easily extendible RESTful API boilerplate aiming to follow idiomatic go and best practice.
 
 ### Features
-* PostgreSQL support including migrations using [go-pg](https://github.com/go-pg/pg)
-* Structured logging with [Logrus](https://github.com/sirupsen/logrus)
-* Routing with [chi router](https://github.com/go-chi/chi)
-* JWT Authentication using [jwt-go](https://github.com/dgrijalva/jwt-go) with passwordless email authentication (could be easily extended to use passwords instead)
-* Configuration using [viper](https://github.com/spf13/viper)
-* CLI features using [cobra](https://github.com/spf13/cobra)
-* [dep](https://github.com/golang/dep) for dependency management
+- Configuration using [viper](https://github.com/spf13/viper)
+- CLI features using [cobra](https://github.com/spf13/cobra)
+- [dep](https://github.com/golang/dep) for dependency management
+- PostgreSQL support including migrations using [go-pg](https://github.com/go-pg/pg)
+- Structured logging with [Logrus](https://github.com/sirupsen/logrus)
+- Routing with [chi router](https://github.com/go-chi/chi) and middleware
+- JWT Authentication using [jwt-go](https://github.com/dgrijalva/jwt-go) in combination with passwordless email authentication (could be easily extended to use passwords instead)
+- Request data validation using [ozzo-validation](https://github.com/go-ozzo/ozzo-validation)
+- HTML emails with [gomail](https://github.com/go-gomail/gomail)
 
+### Start Application
+- Clone this repository
+- Create a postgres database and set environment variable *DATABASE_URL* accordingly if not using same as default
+- Build the application: ```go build``` to create ```go-base``` binary or use ```go run main.go``` instead in the following commands
+- Initialize the database migrations table: ```go-base migrate init```
+- Run all migrations found in ./database/migrate with: ```go-base migrate```
+- Run the application: ```go-base serve```
 
+#### Demo client application
+For demonstration of the login and account management features this API also serves a Single Page Application (SPA) as a Progressive Web App (PWA) done with [Quasar Framework](http://quasar-framework.org) which itself is powered by [Vue.js](https://vuejs.org). The client's source code can be found [here](https://github.com/dhax/go-base-client).
+
+If no valid email smtp settings are provided by environment variables, emails will be print to stdout showing the login token. Use one of the following users for login:
+- admin@boot.io (has access to admin panel)
+- user@boot.io
 
 ### Environment Variables
 

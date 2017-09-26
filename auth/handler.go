@@ -139,7 +139,7 @@ func (rs *Resource) token(w http.ResponseWriter, r *http.Request) {
 
 	if err := rs.store.SaveRefreshToken(token); err != nil {
 		log(r).Error(err)
-		render.Respond(w, r, ErrInternalServerError)
+		render.Render(w, r, ErrInternalServerError)
 		return
 	}
 
@@ -148,7 +148,7 @@ func (rs *Resource) token(w http.ResponseWriter, r *http.Request) {
 	acc.LastLogin = time.Now()
 	if err := rs.store.UpdateAccount(acc); err != nil {
 		log(r).Error(err)
-		render.Respond(w, r, ErrInternalServerError)
+		render.Render(w, r, ErrInternalServerError)
 		return
 	}
 
@@ -185,14 +185,14 @@ func (rs *Resource) refresh(w http.ResponseWriter, r *http.Request) {
 	access, refresh := rs.Token.GenTokenPair(acc, token)
 	if err := rs.store.SaveRefreshToken(token); err != nil {
 		log(r).Error(err)
-		render.Respond(w, r, ErrInternalServerError)
+		render.Render(w, r, ErrInternalServerError)
 		return
 	}
 
 	acc.LastLogin = time.Now()
 	if err := rs.store.UpdateAccount(acc); err != nil {
 		log(r).Error(err)
-		render.Respond(w, r, ErrInternalServerError)
+		render.Render(w, r, ErrInternalServerError)
 		return
 	}
 

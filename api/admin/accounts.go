@@ -118,7 +118,7 @@ func (rs *AccountResource) list(w http.ResponseWriter, r *http.Request) {
 func (rs *AccountResource) create(w http.ResponseWriter, r *http.Request) {
 	data := &accountRequest{}
 	if err := render.Bind(r, data); err != nil {
-		render.Respond(w, r, ErrInvalidRequest(err))
+		render.Render(w, r, ErrInvalidRequest(err))
 		return
 	}
 

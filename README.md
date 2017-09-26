@@ -29,6 +29,8 @@ If no valid email smtp settings are provided by environment variables, emails wi
 - admin@boot.io (has access to admin panel)
 - user@boot.io
 
+A deployed version can also be found on [Heroku](https://govue.herokuapp.com)
+
 ### Environment Variables
 
 Name | Type | Default | Description

@@ -12,8 +12,8 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-// Store defines database operations on account and token data.
-type Store interface {
+// Storer defines database operations on account and token data.
+type Storer interface {
 	GetByID(id int) (*models.Account, error)
 	GetByEmail(email string) (*models.Account, error)
 	GetByRefreshToken(token string) (*models.Account, *models.Token, error)
@@ -23,21 +23,21 @@ type Store interface {
 	PurgeExpiredToken() error
 }
 
-// EmailService defines methods to send account emails.
-type EmailService interface {
-	LoginToken(name, email string, c email.LoginTokenContent) error
+// Mailer defines methods to send account emails.
+type Mailer interface {
+	LoginToken(name, email string, c email.ContentLoginToken) error
 }
 
 // Resource implements passwordless token authentication against a database.
 type Resource struct {
 	Login  *LoginTokenAuth
 	Token  *TokenAuth
-	store  Store
-	mailer EmailService
+	store  Storer
+	mailer Mailer
 }
 
 // NewResource returns a configured authentication resource.
-func NewResource(store Store, mailer EmailService) (*Resource, error) {
+func NewResource(store Storer, mailer Mailer) (*Resource, error) {
 	loginAuth, err := NewLoginTokenAuth()
 	if err != nil {
 		return nil, err
@@ -55,7 +55,7 @@ func NewResource(store Store, mailer EmailService) (*Resource, error) {
 		mailer: mailer,
 	}
 
-	resource.Cleanup()
+	resource.cleanupTicker()
 
 	return resource, nil
 }
@@ -75,7 +75,7 @@ func (rs *Resource) Router() *chi.Mux {
 	return r
 }
 
-func (rs *Resource) Cleanup() {
+func (rs *Resource) cleanupTicker() {
 	ticker := time.NewTicker(time.Hour * 1)
 	go func() {
 		for range ticker.C {

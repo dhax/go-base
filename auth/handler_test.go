@@ -25,7 +25,7 @@ import (
 var (
 	auth      *Resource
 	authstore mock.AuthStore
-	mailer    mock.EmailService
+	mailer    mock.Mailer
 	ts        *httptest.Server
 )
 
@@ -72,7 +72,7 @@ func TestAuthResource_login(t *testing.T) {
 		return &a, err
 	}
 
-	mailer.LoginTokenFn = func(n, e string, c email.LoginTokenContent) error {
+	mailer.LoginTokenFn = func(n, e string, c email.ContentLoginToken) error {
 		return nil
 	}
 

@@ -21,13 +21,15 @@ var (
 	debug bool
 )
 
-type EmailService struct {
+// Mailer is a SMTP mailer
+type Mailer struct {
 	client         *gomail.Dialer
 	templates      *template.Template
 	from, fromName string
 }
 
-func NewEmailService() (*EmailService, error) {
+// NewMailer returns a configured SMTP Mailer
+func NewMailer() (*Mailer, error) {
 	templates, err := parseTemplates()
 	if err != nil {
 		return nil, err
@@ -38,7 +40,7 @@ func NewEmailService() (*EmailService, error) {
 	smtpUser := viper.GetString("email_smtp_user")
 	smtpPass := viper.GetString("email_smtp_password")
 
-	s := &EmailService{
+	s := &Mailer{
 		client:    gomail.NewPlainDialer(smtpHost, smtpPort, smtpUser, smtpPass),
 		templates: templates,
 		from:      viper.GetString("email_from_address"),
@@ -56,9 +58,10 @@ func NewEmailService() (*EmailService, error) {
 	return s, nil
 }
 
-func (s *EmailService) send(msg *Message) error {
+// Send parses the corrsponding template and send the mail via smtp
+func (m *Mailer) Send(mail *Mail) error {
 	buf := new(bytes.Buffer)
-	if err := s.templates.ExecuteTemplate(buf, msg.template, msg.content); err != nil {
+	if err := m.templates.ExecuteTemplate(buf, mail.template, mail.content); err != nil {
 		return err
 	}
 	prem := premailer.NewPremailerFromString(buf.String(), premailer.NewOptions())
@@ -73,43 +76,46 @@ func (s *EmailService) send(msg *Message) error {
 	}
 
 	if debug {
-		log.Println("To:", msg.to.Address)
-		log.Println("Subject:", msg.subject)
+		log.Println("To:", mail.to.Address)
+		log.Println("Subject:", mail.subject)
 		log.Println(text)
 		return nil
 	}
 
-	m := gomail.NewMessage()
-	m.SetAddressHeader("From", msg.from.Address, msg.from.Name)
-	m.SetAddressHeader("To", msg.to.Address, msg.to.Name)
-	m.SetHeader("Subject", msg.subject)
-	m.SetBody("text/plain", text)
-	m.AddAlternative("text/html", html)
+	msg := gomail.NewMessage()
+	msg.SetAddressHeader("From", mail.from.Address, mail.from.Name)
+	msg.SetAddressHeader("To", mail.to.Address, mail.to.Name)
+	msg.SetHeader("Subject", mail.subject)
+	msg.SetBody("text/plain", text)
+	msg.AddAlternative("text/html", html)
 
-	if err := s.client.DialAndSend(m); err != nil {
+	if err := m.client.DialAndSend(msg); err != nil {
 		return err
 	}
 	return nil
 }
 
-type Email struct {
-	Name    string
-	Address string
-}
-
-func NewEmail(name string, address string) *Email {
-	return &Email{
-		Name:    name,
-		Address: address,
-	}
-}
-
-type Message struct {
+// Mail struct holds all parts of a specific email
+type Mail struct {
 	from     *Email
 	to       *Email
 	subject  string
 	template string
 	content  interface{}
+}
+
+// Email struct holds email address and recipient name
+type Email struct {
+	Name    string
+	Address string
+}
+
+// NewEmail returns an email address
+func NewEmail(name string, address string) *Email {
+	return &Email{
+		Name:    name,
+		Address: address,
+	}
 }
 
 func parseTemplates() (*template.Template, error) {

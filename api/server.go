@@ -46,7 +46,7 @@ func NewServer() (*Server, error) {
 func (srv *Server) Start() {
 	log.Println("starting server...")
 	go func() {
-		if err := srv.ListenAndServe(); err != nil {
+		if err := srv.ListenAndServe(); err != http.ErrServerClosed {
 			panic(err)
 		}
 	}()

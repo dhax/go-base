@@ -65,15 +65,15 @@ func (rs *Resource) login(w http.ResponseWriter, r *http.Request) {
 	lt := rs.Login.CreateToken(acc.ID)
 
 	go func() {
-		err := rs.mailer.LoginToken(acc.Name, acc.Email, email.LoginTokenContent{
+		content := email.ContentLoginToken{
 			Email:  acc.Email,
 			Name:   acc.Name,
 			URL:    path.Join(rs.Login.loginURL, lt.Token),
 			Token:  lt.Token,
 			Expiry: lt.Expiry,
-		})
-		if err != nil {
-			log(r).WithField("module", "email").Error(err.Error())
+		}
+		if err := rs.mailer.LoginToken(acc.Name, acc.Email, content); err != nil {
+			log(r).WithField("module", "email").Error(err)
 		}
 	}()
 
@@ -128,6 +128,7 @@ func (rs *Resource) token(w http.ResponseWriter, r *http.Request) {
 
 	ua := user_agent.New(r.UserAgent())
 	browser, _ := ua.Browser()
+
 	token := &models.Token{
 		Token:      uuid.NewV4().String(),
 		Expiry:     time.Now().Add(time.Minute * rs.Token.jwtRefreshExpiry),

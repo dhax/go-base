@@ -2,7 +2,8 @@ package email
 
 import "time"
 
-type LoginTokenContent struct {
+// ContentLoginToken defines content for login token email template
+type ContentLoginToken struct {
 	Email  string
 	Name   string
 	URL    string
@@ -10,15 +11,16 @@ type LoginTokenContent struct {
 	Expiry time.Time
 }
 
-func (s *EmailService) LoginToken(name, address string, content LoginTokenContent) error {
-	msg := &Message{
-		from:     NewEmail(s.fromName, s.from),
+// LoginToken creates and sends a login token email with provided template content
+func (m *Mailer) LoginToken(name, address string, content ContentLoginToken) error {
+	msg := &Mail{
+		from:     NewEmail(m.fromName, m.from),
 		to:       NewEmail(name, address),
 		subject:  "Login Token",
 		template: "loginToken",
 		content:  content,
 	}
 
-	err := s.send(msg)
+	err := m.Send(msg)
 	return err
 }

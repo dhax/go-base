@@ -27,13 +27,13 @@ func NewAPI() (*chi.Mux, error) {
 		return nil, err
 	}
 
-	emailService, err := email.NewEmailService()
+	mailer, err := email.NewMailer()
 	if err != nil {
 		return nil, err
 	}
 
 	authStore := database.NewAuthStore(db)
-	authResource, err := auth.NewResource(authStore, emailService)
+	authResource, err := auth.NewResource(authStore, mailer)
 	if err != nil {
 		return nil, err
 	}

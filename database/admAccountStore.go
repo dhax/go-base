@@ -8,19 +8,23 @@ import (
 )
 
 var (
+	// ErrUniqueEmailConstraint provides error message for already registered email address.
 	ErrUniqueEmailConstraint = errors.New("email already registered")
 )
 
+// AdmAccountStore implements database operations for account management by admin.
 type AdmAccountStore struct {
 	db *pg.DB
 }
 
+// NewAdmAccountStore returns an AccountStore.
 func NewAdmAccountStore(db *pg.DB) *AdmAccountStore {
 	return &AdmAccountStore{
 		db: db,
 	}
 }
 
+// List applies a filter and returns paginated array of matching results and total count.
 func (s *AdmAccountStore) List(f models.AccountFilter) (*[]models.Account, int, error) {
 	var a []models.Account
 	count, err := s.db.Model(&a).
@@ -32,6 +36,7 @@ func (s *AdmAccountStore) List(f models.AccountFilter) (*[]models.Account, int, 
 	return &a, count, nil
 }
 
+// Create creates a new account.
 func (s *AdmAccountStore) Create(a *models.Account) error {
 	count, _ := s.db.Model(a).
 		Where("email = ?email").
@@ -55,17 +60,20 @@ func (s *AdmAccountStore) Create(a *models.Account) error {
 	return err
 }
 
+// Get account by ID.
 func (s *AdmAccountStore) Get(id int) (*models.Account, error) {
 	a := models.Account{ID: id}
 	err := s.db.Select(&a)
 	return &a, err
 }
 
+// Update account.
 func (s *AdmAccountStore) Update(a *models.Account) error {
 	err := s.db.Update(a)
 	return err
 }
 
+// Delete account.
 func (s *AdmAccountStore) Delete(a *models.Account) error {
 	err := s.db.RunInTransaction(func(tx *pg.Tx) error {
 		if _, err := tx.Model(&models.Token{}).

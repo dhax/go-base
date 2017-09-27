@@ -9,7 +9,7 @@ import (
 	"github.com/go-pg/pg"
 )
 
-// DBConn returns a postgres connection pool
+// DBConn returns a postgres connection pool.
 func DBConn() (*pg.DB, error) {
 
 	opts, err := pg.ParseURL(viper.GetString("database_url"))

@@ -18,7 +18,7 @@ import (
 	"github.com/go-chi/render"
 )
 
-// NewAPI configures application resources and routes
+// NewAPI configures application resources and routes.
 func NewAPI() (*chi.Mux, error) {
 	logger := logging.NewLogger()
 
@@ -94,7 +94,7 @@ func corsConfig() *cors.Cors {
 	})
 }
 
-// SPAHandler serves the public Single Page Application
+// SPAHandler serves the public Single Page Application.
 func SPAHandler(publicDir string) http.HandlerFunc {
 	handler := http.FileServer(http.Dir(publicDir))
 

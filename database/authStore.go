@@ -7,16 +7,19 @@ import (
 	"github.com/go-pg/pg"
 )
 
+// AuthStore implements database operations for account authentication.
 type AuthStore struct {
 	db *pg.DB
 }
 
+// NewAuthStore return an AuthStore.
 func NewAuthStore(db *pg.DB) *AuthStore {
 	return &AuthStore{
 		db: db,
 	}
 }
 
+// GetByID returns an account by ID.
 func (s *AuthStore) GetByID(id int) (*models.Account, error) {
 	a := models.Account{ID: id}
 	err := s.db.Model(&a).
@@ -26,6 +29,7 @@ func (s *AuthStore) GetByID(id int) (*models.Account, error) {
 	return &a, err
 }
 
+// GetByEmail returns an account by email.
 func (s *AuthStore) GetByEmail(e string) (*models.Account, error) {
 	a := models.Account{Email: e}
 	err := s.db.Model(&a).
@@ -35,6 +39,7 @@ func (s *AuthStore) GetByEmail(e string) (*models.Account, error) {
 	return &a, err
 }
 
+// GetByRefreshToken returns an account and refresh token by token identifier.
 func (s *AuthStore) GetByRefreshToken(t string) (*models.Account, *models.Token, error) {
 	token := models.Token{Token: t}
 	err := s.db.Model(&token).
@@ -53,6 +58,7 @@ func (s *AuthStore) GetByRefreshToken(t string) (*models.Account, *models.Token,
 	return &a, &token, err
 }
 
+// UpdateAccount upates account data related to authentication.
 func (s *AuthStore) UpdateAccount(a *models.Account) error {
 	_, err := s.db.Model(a).
 		Column("last_login").
@@ -60,6 +66,7 @@ func (s *AuthStore) UpdateAccount(a *models.Account) error {
 	return err
 }
 
+// SaveRefreshToken creates or updates a refresh token.
 func (s *AuthStore) SaveRefreshToken(t *models.Token) error {
 	var err error
 	if t.ID == 0 {
@@ -70,11 +77,13 @@ func (s *AuthStore) SaveRefreshToken(t *models.Token) error {
 	return err
 }
 
+// DeleteRefreshToken deletes a refresh token.
 func (s *AuthStore) DeleteRefreshToken(t *models.Token) error {
 	err := s.db.Delete(t)
 	return err
 }
 
+// PurgeExpiredToken deletes expired refresh token.
 func (s *AuthStore) PurgeExpiredToken() error {
 	_, err := s.db.Model(&models.Token{}).
 		Where("expiry < ?", time.Now()).

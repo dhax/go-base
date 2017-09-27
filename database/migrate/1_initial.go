@@ -6,7 +6,7 @@ import (
 	"github.com/go-pg/migrations"
 )
 
-const AccountTable = `
+const accountTable = `
 CREATE TABLE accounts (
 id serial NOT NULL,
 created_at timestamp with time zone NOT NULL DEFAULT current_timestamp,
@@ -19,7 +19,7 @@ roles text[] NOT NULL DEFAULT '{"user"}',
 PRIMARY KEY (id)
 )`
 
-const TokenTable = `
+const tokenTable = `
 CREATE TABLE tokens (
 id serial NOT NULL,
 created_at timestamp with time zone NOT NULL DEFAULT current_timestamp,
@@ -34,8 +34,8 @@ PRIMARY KEY (id)
 
 func init() {
 	up := []string{
-		AccountTable,
-		TokenTable,
+		accountTable,
+		tokenTable,
 	}
 
 	down := []string{

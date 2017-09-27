@@ -21,14 +21,14 @@ var (
 	debug bool
 )
 
-// Mailer is a SMTP mailer
+// Mailer is a SMTP mailer.
 type Mailer struct {
 	client         *gomail.Dialer
 	templates      *template.Template
 	from, fromName string
 }
 
-// NewMailer returns a configured SMTP Mailer
+// NewMailer returns a configured SMTP Mailer.
 func NewMailer() (*Mailer, error) {
 	templates, err := parseTemplates()
 	if err != nil {
@@ -58,7 +58,7 @@ func NewMailer() (*Mailer, error) {
 	return s, nil
 }
 
-// Send parses the corrsponding template and send the mail via smtp
+// Send parses the corrsponding template and sends the mail via smtp.
 func (m *Mailer) Send(mail *Mail) error {
 	buf := new(bytes.Buffer)
 	if err := m.templates.ExecuteTemplate(buf, mail.template, mail.content); err != nil {
@@ -95,7 +95,7 @@ func (m *Mailer) Send(mail *Mail) error {
 	return nil
 }
 
-// Mail struct holds all parts of a specific email
+// Mail struct holds all parts of a specific email.
 type Mail struct {
 	from     *Email
 	to       *Email
@@ -104,13 +104,13 @@ type Mail struct {
 	content  interface{}
 }
 
-// Email struct holds email address and recipient name
+// Email struct holds email address and recipient name.
 type Email struct {
 	Name    string
 	Address string
 }
 
-// NewEmail returns an email address
+// NewEmail returns an email address.
 func NewEmail(name string, address string) *Email {
 	return &Email{
 		Name:    name,

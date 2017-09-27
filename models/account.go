@@ -10,6 +10,7 @@ import (
 	"github.com/go-pg/pg/orm"
 )
 
+// Account represents an authenticated application user
 type Account struct {
 	ID        int       `json:"id"`
 	CreatedAt time.Time `json:"created_at,omitempty"`
@@ -25,6 +26,7 @@ type Account struct {
 	Token   []*Token `json:"token,omitempty"`
 }
 
+// BeforeInsert hook executed before database insert operation.
 func (a *Account) BeforeInsert(db orm.DB) error {
 	now := time.Now()
 	if a.CreatedAt.IsZero() {
@@ -37,6 +39,7 @@ func (a *Account) BeforeInsert(db orm.DB) error {
 	return nil
 }
 
+// BeforeUpdate hook executed before database update operation.
 func (a *Account) BeforeUpdate(db orm.DB) error {
 	if err := a.Validate(); err != nil {
 		return err
@@ -45,10 +48,12 @@ func (a *Account) BeforeUpdate(db orm.DB) error {
 	return nil
 }
 
+// BeforeDelete hook executed before database delete operation.
 func (a *Account) BeforeDelete(db orm.DB) error {
 	return nil
 }
 
+// Validate validates Account struct and returns validation errors.
 func (a *Account) Validate() error {
 	a.Email = strings.TrimSpace(a.Email)
 	a.Email = strings.ToLower(a.Email)
@@ -60,16 +65,19 @@ func (a *Account) Validate() error {
 	)
 }
 
+// CanLogin returns true if is user is allowed to login.
 func (a *Account) CanLogin() bool {
 	return a.Active
 }
 
+// AccountFilter provides pagination and filtering options on accounts.
 type AccountFilter struct {
 	orm.Pager
 	Filters url.Values
 	Order   []string
 }
 
+// Filter applies an AccountFilter on an orm.Query.
 func (f *AccountFilter) Filter(q *orm.Query) (*orm.Query, error) {
 	q = q.Apply(f.Pager.Paginate)
 	q = q.Apply(orm.URLFilters(f.Filters))
@@ -77,6 +85,7 @@ func (f *AccountFilter) Filter(q *orm.Query) (*orm.Query, error) {
 	return q, nil
 }
 
+// NewAccountFilter returns an AccountFilter with options parsed from request url values.
 func NewAccountFilter(v url.Values) AccountFilter {
 	var f AccountFilter
 	f.SetURLValues(v)

@@ -12,8 +12,8 @@ var (
 	errTokenNotFound = errors.New("login token not found")
 )
 
-// loginToken is an in-memory saved token referencing an account ID and an expiry date.
-type loginToken struct {
+// LoginToken is an in-memory saved token referencing an account ID and an expiry date.
+type LoginToken struct {
 	Token     string
 	AccountID int
 	Expiry    time.Time
@@ -21,7 +21,7 @@ type loginToken struct {
 
 // LoginTokenAuth implements passwordless login authentication flow using temporary in-memory stored tokens.
 type LoginTokenAuth struct {
-	token            map[string]loginToken
+	token            map[string]LoginToken
 	mux              sync.RWMutex
 	loginURL         string
 	loginTokenLength int
@@ -31,7 +31,7 @@ type LoginTokenAuth struct {
 // NewLoginTokenAuth configures and returns a LoginToken authentication instance.
 func NewLoginTokenAuth() (*LoginTokenAuth, error) {
 	a := &LoginTokenAuth{
-		token:            make(map[string]loginToken),
+		token:            make(map[string]LoginToken),
 		loginURL:         viper.GetString("auth_login_url"),
 		loginTokenLength: viper.GetInt("auth_login_token_length"),
 		loginTokenExpiry: viper.GetDuration("auth_login_token_expiry"),
@@ -40,8 +40,8 @@ func NewLoginTokenAuth() (*LoginTokenAuth, error) {
 }
 
 // CreateToken creates an in-memory login token referencing account ID. It returns a token containing a random tokenstring and expiry date.
-func (a *LoginTokenAuth) CreateToken(id int) loginToken {
-	lt := loginToken{
+func (a *LoginTokenAuth) CreateToken(id int) LoginToken {
+	lt := LoginToken{
 		Token:     randStringBytes(a.loginTokenLength),
 		AccountID: id,
 		Expiry:    time.Now().Add(time.Minute * a.loginTokenExpiry),
@@ -61,14 +61,14 @@ func (a *LoginTokenAuth) GetAccountID(token string) (int, error) {
 	return lt.AccountID, nil
 }
 
-func (a *LoginTokenAuth) get(token string) (loginToken, bool) {
+func (a *LoginTokenAuth) get(token string) (LoginToken, bool) {
 	a.mux.RLock()
 	lt, ok := a.token[token]
 	a.mux.RUnlock()
 	return lt, ok
 }
 
-func (a *LoginTokenAuth) add(lt loginToken) {
+func (a *LoginTokenAuth) add(lt LoginToken) {
 	a.mux.Lock()
 	a.token[lt.Token] = lt
 	a.mux.Unlock()

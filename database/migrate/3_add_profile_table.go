@@ -6,7 +6,7 @@ import (
 	"github.com/go-pg/migrations"
 )
 
-const ProfileTable = `
+const profileTable = `
 CREATE TABLE profiles (
 id serial NOT NULL,
 created_at timestamp with time zone NOT NULL DEFAULT current_timestamp,
@@ -23,7 +23,7 @@ INSERT INTO profiles(account_id) VALUES(2);
 
 func init() {
 	up := []string{
-		ProfileTable,
+		profileTable,
 		bootstrapAccountProfiles,
 	}
 

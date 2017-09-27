@@ -8,6 +8,7 @@ import (
 	"github.com/go-pg/pg/orm"
 )
 
+// Profile holds specific application settings linked to an Account.
 type Profile struct {
 	ID        int       `json:"id,omitempty"`
 	AccountID int       `json:"-"`
@@ -17,6 +18,7 @@ type Profile struct {
 	Theme string `json:"theme,omitempty"`
 }
 
+// BeforeInsert hook executed before database insert operation.
 func (p *Profile) BeforeInsert(db orm.DB) error {
 	now := time.Now()
 	if p.CreatedAt.IsZero() {
@@ -26,6 +28,7 @@ func (p *Profile) BeforeInsert(db orm.DB) error {
 	return nil
 }
 
+// BeforeUpdate hook executed before database update operation.
 func (p *Profile) BeforeUpdate(db orm.DB) error {
 	if err := p.Validate(); err != nil {
 		return err
@@ -34,6 +37,7 @@ func (p *Profile) BeforeUpdate(db orm.DB) error {
 	return nil
 }
 
+// Validate validates Profile struct and returns validation errors.
 func (p *Profile) Validate() error {
 
 	return validation.ValidateStruct(p,

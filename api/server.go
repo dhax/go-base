@@ -11,7 +11,7 @@ import (
 	"github.com/spf13/viper"
 )
 
-// Server provides an http.Server
+// Server provides an http.Server.
 type Server struct {
 	*http.Server
 }
@@ -42,7 +42,7 @@ func NewServer() (*Server, error) {
 	return &Server{&srv}, nil
 }
 
-// Start runs ListenAndServe on the http.Server with graceful shutdown
+// Start runs ListenAndServe on the http.Server with graceful shutdown.
 func (srv *Server) Start() {
 	log.Println("starting server...")
 	go func() {

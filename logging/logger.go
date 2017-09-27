@@ -10,7 +10,10 @@ import (
 	"github.com/spf13/viper"
 )
 
-var Logger *logrus.Logger
+var (
+	// Logger is a configured logrus.Logger.
+	Logger *logrus.Logger
+)
 
 // StructuredLogger is a structured logrus Logger.
 type StructuredLogger struct {
@@ -47,6 +50,7 @@ func NewStructuredLogger(logger *logrus.Logger) func(next http.Handler) http.Han
 	return middleware.RequestLogger(&StructuredLogger{Logger})
 }
 
+// NewLogEntry sets default request log fields.
 func (l *StructuredLogger) NewLogEntry(r *http.Request) middleware.LogEntry {
 	entry := &StructuredLoggerEntry{Logger: logrus.NewEntry(l.Logger)}
 	logFields := logrus.Fields{}
@@ -79,6 +83,7 @@ func (l *StructuredLogger) NewLogEntry(r *http.Request) middleware.LogEntry {
 	return entry
 }
 
+// StructuredLoggerEntry is a logrus.FieldLogger.
 type StructuredLoggerEntry struct {
 	Logger logrus.FieldLogger
 }
@@ -93,6 +98,7 @@ func (l *StructuredLoggerEntry) Write(status, bytes int, elapsed time.Duration) 
 	l.Logger.Infoln("request complete")
 }
 
+// Panic prints stack trace
 func (l *StructuredLoggerEntry) Panic(v interface{}, stack []byte) {
 	l.Logger = l.Logger.WithFields(logrus.Fields{
 		"stack": string(stack),
@@ -103,17 +109,20 @@ func (l *StructuredLoggerEntry) Panic(v interface{}, stack []byte) {
 // Helper methods used by the application to get the request-scoped
 // logger entry and set additional fields between handlers.
 
+// GetLogEntry return the request scoped logrus.FieldLogger.
 func GetLogEntry(r *http.Request) logrus.FieldLogger {
 	entry := middleware.GetLogEntry(r).(*StructuredLoggerEntry)
 	return entry.Logger
 }
 
+// LogEntrySetField adds a field to the request scoped logrus.FieldLogger.
 func LogEntrySetField(r *http.Request, key string, value interface{}) {
 	if entry, ok := r.Context().Value(middleware.LogEntryCtxKey).(*StructuredLoggerEntry); ok {
 		entry.Logger = entry.Logger.WithField(key, value)
 	}
 }
 
+// LogEntrySetFields adds multiple fields to the request scoped logrus.FieldLogger.
 func LogEntrySetFields(r *http.Request, fields map[string]interface{}) {
 	if entry, ok := r.Context().Value(middleware.LogEntryCtxKey).(*StructuredLoggerEntry); ok {
 		entry.Logger = entry.Logger.WithFields(fields)

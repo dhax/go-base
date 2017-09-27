@@ -2,7 +2,7 @@ package email
 
 import "time"
 
-// ContentLoginToken defines content for login token email template
+// ContentLoginToken defines content for login token email template.
 type ContentLoginToken struct {
 	Email  string
 	Name   string
@@ -11,7 +11,7 @@ type ContentLoginToken struct {
 	Expiry time.Time
 }
 
-// LoginToken creates and sends a login token email with provided template content
+// LoginToken creates and sends a login token email with provided template content.
 func (m *Mailer) LoginToken(name, address string, content ContentLoginToken) error {
 	msg := &Mail{
 		from:     NewEmail(m.fromName, m.from),

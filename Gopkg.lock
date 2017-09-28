@@ -44,6 +44,12 @@
   version = "v1.0.0"
 
 [[projects]]
+  name = "github.com/go-chi/docgen"
+  packages = ["."]
+  revision = "ac43d9a63f3b58b1e82922411d2de365d896ee72"
+  version = "v1.0.2"
+
+[[projects]]
   name = "github.com/go-chi/jwtauth"
   packages = ["."]
   revision = "e701090bf80b87b3f81b27edf0559ab044b11181"
@@ -261,6 +267,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "7eee4771041702973c1452dd07edcb18368c463ba616225a8479676443a53faf"
+  inputs-digest = "4e5e0d4a6f658ef6e0fce069907b987ec1e2459bbf2b1cfe8118caf22888a05c"
   solver-name = "gps-cdcl"
   solver-version = 1

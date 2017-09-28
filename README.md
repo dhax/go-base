@@ -22,6 +22,12 @@ Easily extendible RESTful API boilerplate aiming to follow idiomatic go and best
 - Run all migrations found in ./database/migrate with: ```go-base migrate```
 - Run the application: ```go-base serve```
 
+Run ```go-base``` only to see the cobra generated help message. 
+
+### API Routes
+
+Check [routes.md](routes.md) file for an overview of the provided API routes.
+
 #### Demo client application
 For demonstration of the login and account management features this API also serves a Single Page Application (SPA) as a Progressive Web App (PWA) done with [Quasar Framework](http://quasar-framework.org) which itself is powered by [Vue.js](https://vuejs.org). The client's source code can be found [here](https://github.com/dhax/go-base-client).
 
@@ -51,4 +57,3 @@ EMAIL_SMTP_USER | string || email smtp username
 EMAIL_SMTP_PASSWORD | string || email smtp password
 EMAIL_FROM_ADDRESS | string || from address used in sending emails
 EMAIL_FROM_NAME | string || from name used in sending emails
-

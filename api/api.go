@@ -2,6 +2,7 @@ package api
 
 import (
 	"net/http"
+	"os"
 	"path"
 	"strings"
 	"time"
@@ -97,17 +98,18 @@ func corsConfig() *cors.Cors {
 // SPAHandler serves the public Single Page Application.
 func SPAHandler(publicDir string) http.HandlerFunc {
 	handler := http.FileServer(http.Dir(publicDir))
+	return func(w http.ResponseWriter, r *http.Request) {
+		indexPage := path.Join(publicDir, "index.html")
+		serviceWorker := path.Join(publicDir, "service-worker.js")
 
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		url := r.URL.String()
-
-		// serve static files
-		if strings.Contains(url, ".") || url == "/" {
-			handler.ServeHTTP(w, r)
+		requestedAsset := path.Join(publicDir, r.URL.Path)
+		if strings.Contains(requestedAsset, "service-worker.js") {
+			requestedAsset = serviceWorker
+		}
+		if _, err := os.Stat(requestedAsset); err != nil {
+			http.ServeFile(w, r, indexPage)
 			return
 		}
-
-		// otherwise always serve index.html
-		http.ServeFile(w, r, path.Join(publicDir, "/index.html"))
-	})
+		handler.ServeHTTP(w, r)
+	}
 }

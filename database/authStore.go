@@ -3,7 +3,7 @@ package database
 import (
 	"time"
 
-	"github.com/dhax/go-base/models"
+	"github.com/dhax/go-base/auth"
 	"github.com/go-pg/pg"
 )
 
@@ -20,8 +20,8 @@ func NewAuthStore(db *pg.DB) *AuthStore {
 }
 
 // GetByID returns an account by ID.
-func (s *AuthStore) GetByID(id int) (*models.Account, error) {
-	a := models.Account{ID: id}
+func (s *AuthStore) GetByID(id int) (*auth.Account, error) {
+	a := auth.Account{ID: id}
 	err := s.db.Model(&a).
 		Column("account.*").
 		Where("id = ?id").
@@ -30,8 +30,8 @@ func (s *AuthStore) GetByID(id int) (*models.Account, error) {
 }
 
 // GetByEmail returns an account by email.
-func (s *AuthStore) GetByEmail(e string) (*models.Account, error) {
-	a := models.Account{Email: e}
+func (s *AuthStore) GetByEmail(e string) (*auth.Account, error) {
+	a := auth.Account{Email: e}
 	err := s.db.Model(&a).
 		Column("id", "active", "email", "name").
 		Where("email = ?email").
@@ -40,8 +40,8 @@ func (s *AuthStore) GetByEmail(e string) (*models.Account, error) {
 }
 
 // GetByRefreshToken returns an account and refresh token by token identifier.
-func (s *AuthStore) GetByRefreshToken(t string) (*models.Account, *models.Token, error) {
-	token := models.Token{Token: t}
+func (s *AuthStore) GetByRefreshToken(t string) (*auth.Account, *auth.Token, error) {
+	token := auth.Token{Token: t}
 	err := s.db.Model(&token).
 		Where("token = ?token").
 		First()
@@ -49,7 +49,7 @@ func (s *AuthStore) GetByRefreshToken(t string) (*models.Account, *models.Token,
 		return nil, nil, err
 	}
 
-	a := models.Account{ID: token.AccountID}
+	a := auth.Account{ID: token.AccountID}
 	err = s.db.Model(&a).
 		Column("account.*").
 		Where("id = ?id").
@@ -59,7 +59,7 @@ func (s *AuthStore) GetByRefreshToken(t string) (*models.Account, *models.Token,
 }
 
 // UpdateAccount upates account data related to authentication.
-func (s *AuthStore) UpdateAccount(a *models.Account) error {
+func (s *AuthStore) UpdateAccount(a *auth.Account) error {
 	_, err := s.db.Model(a).
 		Column("last_login").
 		Update()
@@ -67,7 +67,7 @@ func (s *AuthStore) UpdateAccount(a *models.Account) error {
 }
 
 // SaveRefreshToken creates or updates a refresh token.
-func (s *AuthStore) SaveRefreshToken(t *models.Token) error {
+func (s *AuthStore) SaveRefreshToken(t *auth.Token) error {
 	var err error
 	if t.ID == 0 {
 		err = s.db.Insert(t)
@@ -78,14 +78,14 @@ func (s *AuthStore) SaveRefreshToken(t *models.Token) error {
 }
 
 // DeleteRefreshToken deletes a refresh token.
-func (s *AuthStore) DeleteRefreshToken(t *models.Token) error {
+func (s *AuthStore) DeleteRefreshToken(t *auth.Token) error {
 	err := s.db.Delete(t)
 	return err
 }
 
 // PurgeExpiredToken deletes expired refresh token.
 func (s *AuthStore) PurgeExpiredToken() error {
-	_, err := s.db.Model(&models.Token{}).
+	_, err := s.db.Model(&auth.Token{}).
 		Where("expiry < ?", time.Now()).
 		Delete()
 

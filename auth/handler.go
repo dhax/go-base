@@ -15,7 +15,6 @@ import (
 	uuid "github.com/satori/go.uuid"
 
 	"github.com/dhax/go-base/email"
-	"github.com/dhax/go-base/models"
 )
 
 // The list of error types presented to the end user as error message.
@@ -129,7 +128,7 @@ func (rs *Resource) token(w http.ResponseWriter, r *http.Request) {
 	ua := user_agent.New(r.UserAgent())
 	browser, _ := ua.Browser()
 
-	token := &models.Token{
+	token := &Token{
 		Token:      uuid.NewV4().String(),
 		Expiry:     time.Now().Add(time.Minute * rs.Token.jwtRefreshExpiry),
 		UpdatedAt:  time.Now(),

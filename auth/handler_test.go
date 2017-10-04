@@ -15,7 +15,6 @@ import (
 
 	"github.com/dhax/go-base/email"
 	"github.com/dhax/go-base/logging"
-	"github.com/dhax/go-base/models"
 	"github.com/dhax/go-base/testing/mock"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/jwtauth"
@@ -24,7 +23,7 @@ import (
 
 var (
 	auth      *Resource
-	authstore mock.AuthStore
+	authstore MockStorer
 	mailer    mock.Mailer
 	ts        *httptest.Server
 )
@@ -53,9 +52,9 @@ func TestMain(m *testing.M) {
 }
 
 func TestAuthResource_login(t *testing.T) {
-	authstore.GetByEmailFn = func(email string) (*models.Account, error) {
+	authstore.GetByEmailFn = func(email string) (*Account, error) {
 		var err error
-		a := models.Account{
+		a := Account{
 			ID:    1,
 			Email: email,
 			Name:  "test",
@@ -115,9 +114,9 @@ func TestAuthResource_login(t *testing.T) {
 }
 
 func TestAuthResource_token(t *testing.T) {
-	authstore.GetByIDFn = func(id int) (*models.Account, error) {
+	authstore.GetByIDFn = func(id int) (*Account, error) {
 		var err error
-		a := models.Account{
+		a := Account{
 			ID:     id,
 			Active: true,
 			Name:   "test",
@@ -132,11 +131,11 @@ func TestAuthResource_token(t *testing.T) {
 		}
 		return &a, err
 	}
-	authstore.UpdateAccountFn = func(a *models.Account) error {
+	authstore.UpdateAccountFn = func(a *Account) error {
 		a.LastLogin = time.Now()
 		return nil
 	}
-	authstore.SaveRefreshTokenFn = func(a *models.Token) error {
+	authstore.SaveRefreshTokenFn = func(a *Token) error {
 		return nil
 	}
 
@@ -185,13 +184,13 @@ func TestAuthResource_token(t *testing.T) {
 }
 
 func TestAuthResource_refresh(t *testing.T) {
-	authstore.GetByRefreshTokenFn = func(token string) (*models.Account, *models.Token, error) {
+	authstore.GetByRefreshTokenFn = func(token string) (*Account, *Token, error) {
 		var err error
-		a := models.Account{
+		a := Account{
 			Active: true,
 			Name:   "Test",
 		}
-		var t models.Token
+		var t Token
 		t.Expiry = time.Now().Add(1 * time.Minute)
 
 		switch token {
@@ -206,14 +205,14 @@ func TestAuthResource_refresh(t *testing.T) {
 		}
 		return &a, &t, err
 	}
-	authstore.UpdateAccountFn = func(a *models.Account) error {
+	authstore.UpdateAccountFn = func(a *Account) error {
 		a.LastLogin = time.Now()
 		return nil
 	}
-	authstore.SaveRefreshTokenFn = func(a *models.Token) error {
+	authstore.SaveRefreshTokenFn = func(a *Token) error {
 		return nil
 	}
-	authstore.DeleteRefreshTokenFn = func(t *models.Token) error {
+	authstore.DeleteRefreshTokenFn = func(t *Token) error {
 		return nil
 	}
 
@@ -260,10 +259,10 @@ func TestAuthResource_refresh(t *testing.T) {
 }
 
 func TestAuthResource_logout(t *testing.T) {
-	authstore.GetByRefreshTokenFn = func(token string) (*models.Account, *models.Token, error) {
+	authstore.GetByRefreshTokenFn = func(token string) (*Account, *Token, error) {
 		var err error
-		var a models.Account
-		t := models.Token{
+		var a Account
+		t := Token{
 			Expiry: time.Now().Add(1 * time.Minute),
 		}
 
@@ -273,7 +272,7 @@ func TestAuthResource_logout(t *testing.T) {
 		}
 		return &a, &t, err
 	}
-	authstore.DeleteRefreshTokenFn = func(a *models.Token) error {
+	authstore.DeleteRefreshTokenFn = func(a *Token) error {
 		return nil
 	}
 

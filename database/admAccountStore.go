@@ -3,6 +3,7 @@ package database
 import (
 	"errors"
 
+	"github.com/dhax/go-base/auth"
 	"github.com/dhax/go-base/models"
 	"github.com/go-pg/pg"
 )
@@ -25,8 +26,8 @@ func NewAdmAccountStore(db *pg.DB) *AdmAccountStore {
 }
 
 // List applies a filter and returns paginated array of matching results and total count.
-func (s *AdmAccountStore) List(f models.AccountFilter) (*[]models.Account, int, error) {
-	var a []models.Account
+func (s *AdmAccountStore) List(f auth.AccountFilter) (*[]auth.Account, int, error) {
+	var a []auth.Account
 	count, err := s.db.Model(&a).
 		Apply(f.Filter).
 		SelectAndCount()
@@ -37,7 +38,7 @@ func (s *AdmAccountStore) List(f models.AccountFilter) (*[]models.Account, int, 
 }
 
 // Create creates a new account.
-func (s *AdmAccountStore) Create(a *models.Account) error {
+func (s *AdmAccountStore) Create(a *auth.Account) error {
 	count, _ := s.db.Model(a).
 		Where("email = ?email").
 		Count()
@@ -61,22 +62,22 @@ func (s *AdmAccountStore) Create(a *models.Account) error {
 }
 
 // Get account by ID.
-func (s *AdmAccountStore) Get(id int) (*models.Account, error) {
-	a := models.Account{ID: id}
+func (s *AdmAccountStore) Get(id int) (*auth.Account, error) {
+	a := auth.Account{ID: id}
 	err := s.db.Select(&a)
 	return &a, err
 }
 
 // Update account.
-func (s *AdmAccountStore) Update(a *models.Account) error {
+func (s *AdmAccountStore) Update(a *auth.Account) error {
 	err := s.db.Update(a)
 	return err
 }
 
 // Delete account.
-func (s *AdmAccountStore) Delete(a *models.Account) error {
+func (s *AdmAccountStore) Delete(a *auth.Account) error {
 	err := s.db.RunInTransaction(func(tx *pg.Tx) error {
-		if _, err := tx.Model(&models.Token{}).
+		if _, err := tx.Model(&auth.Token{}).
 			Where("account_id = ?", a.ID).
 			Delete(); err != nil {
 			return err

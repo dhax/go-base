@@ -8,7 +8,7 @@ import (
 
 	"github.com/go-ozzo/ozzo-validation"
 
-	"github.com/dhax/go-base/models"
+	"github.com/dhax/go-base/auth"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/render"
 )
@@ -26,11 +26,11 @@ const (
 
 // AccountStore defines database operations for account management.
 type AccountStore interface {
-	List(f models.AccountFilter) (*[]models.Account, int, error)
-	Create(*models.Account) error
-	Get(id int) (*models.Account, error)
-	Update(*models.Account) error
-	Delete(*models.Account) error
+	List(f auth.AccountFilter) (*[]auth.Account, int, error)
+	Create(*auth.Account) error
+	Get(id int) (*auth.Account, error)
+	Update(*auth.Account) error
+	Delete(*auth.Account) error
 }
 
 // AccountResource implements account managment handler.
@@ -76,7 +76,7 @@ func (rs *AccountResource) accountCtx(next http.Handler) http.Handler {
 }
 
 type accountRequest struct {
-	*models.Account
+	*auth.Account
 }
 
 func (d *accountRequest) Bind(r *http.Request) error {
@@ -84,20 +84,20 @@ func (d *accountRequest) Bind(r *http.Request) error {
 }
 
 type accountResponse struct {
-	*models.Account
+	*auth.Account
 }
 
-func newAccountResponse(a *models.Account) *accountResponse {
+func newAccountResponse(a *auth.Account) *accountResponse {
 	resp := &accountResponse{Account: a}
 	return resp
 }
 
 type accountListResponse struct {
-	Accounts *[]models.Account `json:"accounts"`
-	Count    int               `json:"count"`
+	Accounts *[]auth.Account `json:"accounts"`
+	Count    int             `json:"count"`
 }
 
-func newAccountListResponse(a *[]models.Account, count int) *accountListResponse {
+func newAccountListResponse(a *[]auth.Account, count int) *accountListResponse {
 	resp := &accountListResponse{
 		Accounts: a,
 		Count:    count,
@@ -106,7 +106,7 @@ func newAccountListResponse(a *[]models.Account, count int) *accountListResponse
 }
 
 func (rs *AccountResource) list(w http.ResponseWriter, r *http.Request) {
-	f := models.NewAccountFilter(r.URL.Query())
+	f := auth.NewAccountFilter(r.URL.Query())
 	al, count, err := rs.Store.List(f)
 	if err != nil {
 		render.Render(w, r, ErrRender(err))
@@ -136,12 +136,12 @@ func (rs *AccountResource) create(w http.ResponseWriter, r *http.Request) {
 }
 
 func (rs *AccountResource) get(w http.ResponseWriter, r *http.Request) {
-	acc := r.Context().Value(ctxAccount).(*models.Account)
+	acc := r.Context().Value(ctxAccount).(*auth.Account)
 	render.Respond(w, r, newAccountResponse(acc))
 }
 
 func (rs *AccountResource) update(w http.ResponseWriter, r *http.Request) {
-	acc := r.Context().Value(ctxAccount).(*models.Account)
+	acc := r.Context().Value(ctxAccount).(*auth.Account)
 	data := &accountRequest{Account: acc}
 	if err := render.Bind(r, data); err != nil {
 		render.Render(w, r, ErrInvalidRequest(err))
@@ -163,7 +163,7 @@ func (rs *AccountResource) update(w http.ResponseWriter, r *http.Request) {
 }
 
 func (rs *AccountResource) delete(w http.ResponseWriter, r *http.Request) {
-	acc := r.Context().Value(ctxAccount).(*models.Account)
+	acc := r.Context().Value(ctxAccount).(*auth.Account)
 	if err := rs.Store.Delete(acc); err != nil {
 		render.Render(w, r, ErrInvalidRequest(err))
 		return

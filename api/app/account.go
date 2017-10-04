@@ -23,11 +23,11 @@ const (
 
 // AccountStore defines database operations for account.
 type AccountStore interface {
-	Get(id int) (*models.Account, error)
-	Update(*models.Account) error
-	Delete(*models.Account) error
-	UpdateToken(*models.Token) error
-	DeleteToken(*models.Token) error
+	Get(id int) (*auth.Account, error)
+	Update(*auth.Account) error
+	Delete(*auth.Account) error
+	UpdateToken(*auth.Token) error
+	DeleteToken(*auth.Token) error
 	UpdateProfile(*models.Profile) error
 }
 
@@ -74,7 +74,7 @@ func (rs *AccountResource) accountCtx(next http.Handler) http.Handler {
 }
 
 type accountRequest struct {
-	*models.Account
+	*auth.Account
 	// not really neccessary here as we limit updated database columns in store
 	ProtectedID     int      `json:"id"`
 	ProtectedActive bool     `json:"active"`
@@ -88,21 +88,21 @@ func (d *accountRequest) Bind(r *http.Request) error {
 }
 
 type accountResponse struct {
-	*models.Account
+	*auth.Account
 }
 
-func newAccountResponse(a *models.Account) *accountResponse {
+func newAccountResponse(a *auth.Account) *accountResponse {
 	resp := &accountResponse{Account: a}
 	return resp
 }
 
 func (rs *AccountResource) get(w http.ResponseWriter, r *http.Request) {
-	acc := r.Context().Value(ctxAccount).(*models.Account)
+	acc := r.Context().Value(ctxAccount).(*auth.Account)
 	render.Respond(w, r, newAccountResponse(acc))
 }
 
 func (rs *AccountResource) update(w http.ResponseWriter, r *http.Request) {
-	acc := r.Context().Value(ctxAccount).(*models.Account)
+	acc := r.Context().Value(ctxAccount).(*auth.Account)
 	data := &accountRequest{Account: acc}
 	if err := render.Bind(r, data); err != nil {
 		render.Render(w, r, ErrInvalidRequest(err))
@@ -124,7 +124,7 @@ func (rs *AccountResource) update(w http.ResponseWriter, r *http.Request) {
 }
 
 func (rs *AccountResource) delete(w http.ResponseWriter, r *http.Request) {
-	acc := r.Context().Value(ctxAccount).(*models.Account)
+	acc := r.Context().Value(ctxAccount).(*auth.Account)
 	if err := rs.Store.Delete(acc); err != nil {
 		render.Render(w, r, ErrRender(err))
 		return
@@ -153,10 +153,10 @@ func (rs *AccountResource) updateToken(w http.ResponseWriter, r *http.Request) {
 		render.Render(w, r, ErrInvalidRequest(err))
 		return
 	}
-	acc := r.Context().Value(ctxAccount).(*models.Account)
+	acc := r.Context().Value(ctxAccount).(*auth.Account)
 	for _, t := range acc.Token {
 		if t.ID == id {
-			if err := rs.Store.UpdateToken(&models.Token{
+			if err := rs.Store.UpdateToken(&auth.Token{
 				ID:         t.ID,
 				Identifier: data.Identifier,
 			}); err != nil {
@@ -174,10 +174,10 @@ func (rs *AccountResource) deleteToken(w http.ResponseWriter, r *http.Request) {
 		render.Render(w, r, ErrBadRequest)
 		return
 	}
-	acc := r.Context().Value(ctxAccount).(*models.Account)
+	acc := r.Context().Value(ctxAccount).(*auth.Account)
 	for _, t := range acc.Token {
 		if t.ID == id {
-			rs.Store.DeleteToken(&models.Token{ID: t.ID})
+			rs.Store.DeleteToken(&auth.Token{ID: t.ID})
 		}
 	}
 	render.Respond(w, r, http.NoBody)
@@ -205,7 +205,7 @@ func newProfileResponse(p *models.Profile) *profileResponse {
 }
 
 func (rs *AccountResource) updateProfile(w http.ResponseWriter, r *http.Request) {
-	acc := r.Context().Value(ctxAccount).(*models.Account)
+	acc := r.Context().Value(ctxAccount).(*auth.Account)
 	data := &profileRequest{Profile: acc.Profile}
 	if err := render.Bind(r, data); err != nil {
 		render.Render(w, r, ErrInvalidRequest(err))

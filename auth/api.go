@@ -6,7 +6,6 @@ import (
 
 	"github.com/dhax/go-base/email"
 	"github.com/dhax/go-base/logging"
-	"github.com/dhax/go-base/models"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/render"
 	"github.com/sirupsen/logrus"
@@ -14,12 +13,12 @@ import (
 
 // Storer defines database operations on account and token data.
 type Storer interface {
-	GetByID(id int) (*models.Account, error)
-	GetByEmail(email string) (*models.Account, error)
-	GetByRefreshToken(token string) (*models.Account, *models.Token, error)
-	UpdateAccount(a *models.Account) error
-	SaveRefreshToken(u *models.Token) error
-	DeleteRefreshToken(t *models.Token) error
+	GetByID(id int) (*Account, error)
+	GetByEmail(email string) (*Account, error)
+	GetByRefreshToken(token string) (*Account, *Token, error)
+	UpdateAccount(a *Account) error
+	SaveRefreshToken(t *Token) error
+	DeleteRefreshToken(t *Token) error
 	PurgeExpiredToken() error
 }
 

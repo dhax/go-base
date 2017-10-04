@@ -1,4 +1,4 @@
-package models
+package auth
 
 import (
 	"time"
@@ -36,6 +36,7 @@ func (t *Token) BeforeUpdate(db orm.DB) error {
 	return nil
 }
 
+// Claims returns the token claims to be signed
 func (t *Token) Claims() jwtauth.Claims {
 	return jwtauth.Claims{
 		"id":    t.ID,

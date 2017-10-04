@@ -144,7 +144,12 @@ func (rs *Resource) token(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	access, refresh := rs.Token.GenTokenPair(acc, token)
+	access, refresh, err := rs.Token.GenTokenPair(acc.Claims(), token.Claims())
+	if err != nil {
+		log(r).Error(err)
+		render.Render(w, r, ErrInternalServerError)
+		return
+	}
 
 	acc.LastLogin = time.Now()
 	if err := rs.store.UpdateAccount(acc); err != nil {
@@ -183,7 +188,13 @@ func (rs *Resource) refresh(w http.ResponseWriter, r *http.Request) {
 	token.Expiry = time.Now().Add(time.Minute * rs.Token.jwtRefreshExpiry)
 	token.UpdatedAt = time.Now()
 
-	access, refresh := rs.Token.GenTokenPair(acc, token)
+	access, refresh, err := rs.Token.GenTokenPair(acc.Claims(), token.Claims())
+	if err != nil {
+		log(r).Error(err)
+		render.Render(w, r, ErrInternalServerError)
+		return
+	}
+
 	if err := rs.store.SaveRefreshToken(token); err != nil {
 		log(r).Error(err)
 		render.Render(w, r, ErrInternalServerError)

@@ -4,7 +4,6 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/dhax/go-base/models"
 	"github.com/go-chi/jwtauth"
 	"github.com/spf13/viper"
 )
@@ -44,38 +43,33 @@ func (a *TokenAuth) Verifier() func(http.Handler) http.Handler {
 	return jwtauth.Verifier(a.JwtAuth)
 }
 
-// GenTokenPair returns both an access token and a refresh token for provided account.
-func (a *TokenAuth) GenTokenPair(u *models.Account, tok *models.Token) (string, string) {
-	access := a.CreateJWT(u)
-	refresh := a.CreateRefreshJWT(tok)
-	return access, refresh
+// GenTokenPair returns both an access token and a refresh token.
+func (a *TokenAuth) GenTokenPair(ca jwtauth.Claims, cr jwtauth.Claims) (string, string, error) {
+	access, err := a.CreateJWT(ca)
+	if err != nil {
+		return "", "", err
+	}
+	refresh, err := a.CreateRefreshJWT(cr)
+	if err != nil {
+		return "", "", err
+	}
+	return access, refresh, nil
 }
 
-// CreateJWT returns an access token for provided account.
-func (a *TokenAuth) CreateJWT(acc *models.Account) string {
-	claims := jwtauth.Claims{
-		"id":    acc.ID,
-		"sub":   acc.Name,
-		"roles": acc.Roles,
-	}
-	claims.SetIssuedNow()
-	claims.SetExpiryIn(a.jwtExpiry * time.Minute)
-
-	_, tokenString, _ := a.JwtAuth.Encode(claims)
-	return tokenString
+// CreateJWT returns an access token for provided account claims.
+func (a *TokenAuth) CreateJWT(c jwtauth.Claims) (string, error) {
+	c.SetIssuedNow()
+	c.SetExpiryIn(a.jwtExpiry * time.Minute)
+	_, tokenString, err := a.JwtAuth.Encode(c)
+	return tokenString, err
 }
 
-// CreateRefreshJWT returns a refresh token for provided account.
-func (a *TokenAuth) CreateRefreshJWT(tok *models.Token) string {
-	claims := jwtauth.Claims{
-		"id":    tok.ID,
-		"token": tok.Token,
-	}
-	claims.SetIssuedNow()
-	claims.SetExpiryIn(time.Minute * a.jwtRefreshExpiry)
-
-	_, tokenString, _ := a.JwtAuth.Encode(claims)
-	return tokenString
+// CreateRefreshJWT returns a refresh token for provided token Claims.
+func (a *TokenAuth) CreateRefreshJWT(c jwtauth.Claims) (string, error) {
+	c.SetIssuedNow()
+	c.SetExpiryIn(time.Minute * a.jwtRefreshExpiry)
+	_, tokenString, err := a.JwtAuth.Encode(c)
+	return tokenString, err
 }
 
 func parseClaims(c jwtauth.Claims) (AppClaims, bool) {

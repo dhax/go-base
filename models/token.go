@@ -3,6 +3,7 @@ package models
 import (
 	"time"
 
+	"github.com/go-chi/jwtauth"
 	"github.com/go-pg/pg/orm"
 )
 
@@ -33,4 +34,11 @@ func (t *Token) BeforeInsert(db orm.DB) error {
 func (t *Token) BeforeUpdate(db orm.DB) error {
 	t.UpdatedAt = time.Now()
 	return nil
+}
+
+func (t *Token) Claims() jwtauth.Claims {
+	return jwtauth.Claims{
+		"id":    t.ID,
+		"token": t.Token,
+	}
 }

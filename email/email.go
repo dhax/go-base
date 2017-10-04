@@ -59,7 +59,7 @@ func NewMailer() (*Mailer, error) {
 }
 
 // Send parses the corrsponding template and sends the mail via smtp.
-func (m *Mailer) Send(mail *Mail) error {
+func (m *Mailer) Send(mail *message) error {
 	buf := new(bytes.Buffer)
 	if err := m.templates.ExecuteTemplate(buf, mail.template, mail.content); err != nil {
 		return err
@@ -95,8 +95,8 @@ func (m *Mailer) Send(mail *Mail) error {
 	return nil
 }
 
-// Mail struct holds all parts of a specific email.
-type Mail struct {
+// message struct holds all parts of a specific email message.
+type message struct {
 	from     *Email
 	to       *Email
 	subject  string

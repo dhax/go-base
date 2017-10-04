@@ -5,6 +5,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/go-chi/jwtauth"
 	validation "github.com/go-ozzo/ozzo-validation"
 	"github.com/go-ozzo/ozzo-validation/is"
 	"github.com/go-pg/pg/orm"
@@ -68,6 +69,14 @@ func (a *Account) Validate() error {
 // CanLogin returns true if is user is allowed to login.
 func (a *Account) CanLogin() bool {
 	return a.Active
+}
+
+func (a *Account) Claims() jwtauth.Claims {
+	return jwtauth.Claims{
+		"id":    a.ID,
+		"sub":   a.Name,
+		"roles": a.Roles,
+	}
 }
 
 // AccountFilter provides pagination and filtering options on accounts.

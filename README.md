@@ -18,13 +18,23 @@ Easily extendible RESTful API boilerplate aiming to follow idiomatic go and best
 - Clone this repository
 - Create a postgres database and set environment variable *DATABASE_URL* accordingly if not using same as default
 - Build the application: ```go build``` to create ```go-base``` binary or use ```go run main.go``` instead in the following commands
+- Run ```go-base``` for cobra generated help message.
 - Initialize the database migrations table: ```go-base migrate init```
 - Run all migrations found in ./database/migrate with: ```go-base migrate```
 - Run the application: ```go-base serve```
 
-Run ```go-base``` only to see the cobra generated help message. 
-
 ### API Routes
+
+For passwordless login following routes are available:
+
+Path | Method | Required JSON | Header | Description
+---|---|---|---|---
+/auth/login | POST | email | | the email you want to login with (see below)
+/auth/token | POST | token | | the token you received via email (or printed to stdout if smtp not set)
+/auth/refresh | POST | | Authorization: "Bearer refresh_token" | refresh JWTs
+/auth/logout | POST | | Authorizaiton: "Bearer refresh_token" | logout from this device
+
+Besides /auth/* the API provides to main routes /api/* and /admin/* to distinguish between application and administration features. The latter requires to be logged in as administrator by providing the respective JWT in Authorization Header.
 
 Check [routes.md](routes.md) file for an overview of the provided API routes.
 

@@ -35,26 +35,38 @@ func NewMailer() (*Mailer, error) {
 		return nil, err
 	}
 
-	smtpHost := viper.GetString("email_smtp_host")
-	smtpPort := viper.GetInt("email_smtp_port")
-	smtpUser := viper.GetString("email_smtp_user")
-	smtpPass := viper.GetString("email_smtp_password")
+	smtp := struct {
+		Host     string
+		Port     int
+		User     string
+		Password string
+	}{
+		viper.GetString("email_smtp_host"),
+		viper.GetInt("email_smtp_port"),
+		viper.GetString("email_smtp_user"),
+		viper.GetString("email_smtp_password"),
+	}
 
 	s := &Mailer{
-		client:    gomail.NewPlainDialer(smtpHost, smtpPort, smtpUser, smtpPass),
+		client:    gomail.NewPlainDialer(smtp.Host, smtp.Port, smtp.User, smtp.Password),
 		templates: templates,
 		from:      viper.GetString("email_from_address"),
 		fromName:  viper.GetString("email_from_name"),
 	}
 
+	if smtp.Host == "" {
+		log.Println("SMTP host not set => printing emails to stdout")
+		debug = true
+		return s, nil
+	}
+
 	d, err := s.client.Dial()
 	if err != nil {
-		log.Println("SMTP error:", err)
-		log.Println("printing emails to stdout")
-		debug = true
+		return nil, err
 	} else {
 		d.Close()
 	}
+
 	return s, nil
 }
 

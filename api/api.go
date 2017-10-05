@@ -25,27 +25,32 @@ func NewAPI() (*chi.Mux, error) {
 
 	db, err := database.DBConn()
 	if err != nil {
+		logger.WithField("module", "database").Error(err)
 		return nil, err
 	}
 
 	mailer, err := email.NewMailer()
 	if err != nil {
+		logger.WithField("module", "email").Error(err)
 		return nil, err
 	}
 
 	authStore := database.NewAuthStore(db)
 	authResource, err := auth.NewResource(authStore, mailer)
 	if err != nil {
+		logger.WithField("module", "auth").Error(err)
 		return nil, err
 	}
 
 	adminAPI, err := admin.NewAPI(db)
 	if err != nil {
+		logger.WithField("module", "admin").Error(err)
 		return nil, err
 	}
 
 	appAPI, err := app.NewAPI(db)
 	if err != nil {
+		logger.WithField("module", "app").Error(err)
 		return nil, err
 	}
 

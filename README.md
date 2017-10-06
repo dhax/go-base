@@ -3,7 +3,11 @@
 
 Easily extendible RESTful API boilerplate aiming to follow idiomatic go and best practice.
 
+The goal of this boiler is to have a solid and structured foundation to build upon on.
+
 ### Features
+The following feature set is a minimal selection of typical Web API requirements:
+
 - Configuration using [viper](https://github.com/spf13/viper)
 - CLI features using [cobra](https://github.com/spf13/cobra)
 - [dep](https://github.com/golang/dep) for dependency management
@@ -54,16 +58,20 @@ Name | Type | Default | Description
 PORT | int | 3000 | http port
 LOG_LEVEL | string | debug | log level
 LOG_TEXTLOGGING | bool | false | defaults to json logging
-DATABASE_URL | string | postgres://postgres:postgres@localhost:5432/gobase?sslmode=disable | PostgreSQL connection string
+DATABASE_URL | string | postgres://postgres:postgres<br>@localhost:5432/gobase?sslmode=disable | PostgreSQL connection string
 AUTH_LOGIN_URL | string | http://localhost:3000/login | client login url as sent in login token email
 AUTH_LOGIN_TOKEN_LENGTH | int | 8 | length of login token
 AUTH_LOGIN_TOKEN_EXPIRY | int | 11 | login token expiry in minutes
 AUTH_JWT_SECRET | string | random | jwt sign and verify key - value "random" sets random 32 char secret at startup
 AUTH_JWT_EXPIRY | int | 15 | jwt access token expiry in minutes
 AUTH_JWT_REFRESH_EXPIRY | int | 60 | jwt refresh token expiry in minutes
-EMAIL_SMTP_HOST | string || email smtp host
+EMAIL_SMTP_HOST | string || email smtp host<br>(if set and connection can't be established then app panics)
 EMAIL_SMTP_PORT | int || email smtp port
 EMAIL_SMTP_USER | string || email smtp username
 EMAIL_SMTP_PASSWORD | string || email smtp password
 EMAIL_FROM_ADDRESS | string || from address used in sending emails
 EMAIL_FROM_NAME | string || from name used in sending emails
+
+### Contributing
+
+Any feedback and pull requests are welcome and highly appreciated. Please open an issue first if you intend to send in a larger pull request or want to add additional features.

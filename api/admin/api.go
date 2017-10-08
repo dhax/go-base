@@ -17,6 +17,12 @@ const (
 	roleAdmin = "admin"
 )
 
+type ctxKey int
+
+const (
+	ctxAccount ctxKey = iota
+)
+
 // API provides admin application resources and handlers.
 type API struct {
 	Accounts *AccountResource

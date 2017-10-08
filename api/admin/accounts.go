@@ -18,12 +18,6 @@ var (
 	ErrAccountValidation = errors.New("account validation error")
 )
 
-type ctxKey int
-
-const (
-	ctxAccount ctxKey = iota
-)
-
 // AccountStore defines database operations for account management.
 type AccountStore interface {
 	List(f auth.AccountFilter) (*[]auth.Account, int, error)

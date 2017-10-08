@@ -15,12 +15,6 @@ import (
 	"github.com/dhax/go-base/models"
 )
 
-type ctxKey int
-
-const (
-	ctxAccount ctxKey = iota
-)
-
 // AccountStore defines database operations for account.
 type AccountStore interface {
 	Get(id int) (*auth.Account, error)

@@ -7,6 +7,12 @@ import (
 	"github.com/dhax/go-base/database"
 )
 
+type ctxKey int
+
+const (
+	ctxAccount ctxKey = iota
+)
+
 // API provides application resources and handlers.
 type API struct {
 	Account *AccountResource

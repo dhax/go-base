@@ -18,20 +18,19 @@ import (
 )
 
 var (
-	debug bool
+	debug     bool
+	templates *template.Template
 )
 
 // Mailer is a SMTP mailer.
 type Mailer struct {
-	client         *gomail.Dialer
-	templates      *template.Template
-	from, fromName string
+	client *gomail.Dialer
+	from   Email
 }
 
 // NewMailer returns a configured SMTP Mailer.
 func NewMailer() (*Mailer, error) {
-	templates, err := parseTemplates()
-	if err != nil {
+	if err := parseTemplates(); err != nil {
 		return nil, err
 	}
 
@@ -48,10 +47,8 @@ func NewMailer() (*Mailer, error) {
 	}
 
 	s := &Mailer{
-		client:    gomail.NewPlainDialer(smtp.Host, smtp.Port, smtp.User, smtp.Password),
-		templates: templates,
-		from:      viper.GetString("email_from_address"),
-		fromName:  viper.GetString("email_from_name"),
+		client: gomail.NewPlainDialer(smtp.Host, smtp.Port, smtp.User, smtp.Password),
+		from:   NewEmail(viper.GetString("email_from_name"), viper.GetString("email_from_address")),
 	}
 
 	if smtp.Host == "" {
@@ -61,36 +58,19 @@ func NewMailer() (*Mailer, error) {
 	}
 
 	d, err := s.client.Dial()
-	if err != nil {
-		return nil, err
-	} else {
+	if err == nil {
 		d.Close()
+		return s, nil
 	}
-
-	return s, nil
+	return nil, err
 }
 
-// Send parses the corrsponding template and sends the mail via smtp.
+// Send sends the mail via smtp.
 func (m *Mailer) Send(mail *message) error {
-	buf := new(bytes.Buffer)
-	if err := m.templates.ExecuteTemplate(buf, mail.template, mail.content); err != nil {
-		return err
-	}
-	prem := premailer.NewPremailerFromString(buf.String(), premailer.NewOptions())
-	html, err := prem.Transform()
-	if err != nil {
-		return err
-	}
-
-	text, err := html2text.FromString(html, html2text.Options{PrettyTables: true})
-	if err != nil {
-		return err
-	}
-
 	if debug {
 		log.Println("To:", mail.to.Address)
 		log.Println("Subject:", mail.subject)
-		log.Println(text)
+		log.Println(mail.text)
 		return nil
 	}
 
@@ -98,8 +78,8 @@ func (m *Mailer) Send(mail *message) error {
 	msg.SetAddressHeader("From", mail.from.Address, mail.from.Name)
 	msg.SetAddressHeader("To", mail.to.Address, mail.to.Name)
 	msg.SetHeader("Subject", mail.subject)
-	msg.SetBody("text/plain", text)
-	msg.AddAlternative("text/html", html)
+	msg.SetBody("text/plain", mail.text)
+	msg.AddAlternative("text/html", mail.html)
 
 	if err := m.client.DialAndSend(msg); err != nil {
 		return err
@@ -109,11 +89,34 @@ func (m *Mailer) Send(mail *message) error {
 
 // message struct holds all parts of a specific email message.
 type message struct {
-	from     *Email
-	to       *Email
+	from     Email
+	to       Email
 	subject  string
 	template string
 	content  interface{}
+	html     string
+	text     string
+}
+
+// parse parses the corrsponding template and content
+func (m *message) parse() error {
+	buf := new(bytes.Buffer)
+	if err := templates.ExecuteTemplate(buf, m.template, m.content); err != nil {
+		return err
+	}
+	prem := premailer.NewPremailerFromString(buf.String(), premailer.NewOptions())
+	html, err := prem.Transform()
+	if err != nil {
+		return err
+	}
+	m.html = html
+
+	text, err := html2text.FromString(html, html2text.Options{PrettyTables: true})
+	if err != nil {
+		return err
+	}
+	m.text = text
+	return nil
 }
 
 // Email struct holds email address and recipient name.
@@ -123,23 +126,22 @@ type Email struct {
 }
 
 // NewEmail returns an email address.
-func NewEmail(name string, address string) *Email {
-	return &Email{
+func NewEmail(name string, address string) Email {
+	return Email{
 		Name:    name,
 		Address: address,
 	}
 }
 
-func parseTemplates() (*template.Template, error) {
-	tmpl := template.New("").Funcs(fMap)
-	err := filepath.Walk("./templates", func(path string, info os.FileInfo, err error) error {
+func parseTemplates() error {
+	templates = template.New("").Funcs(fMap)
+	return filepath.Walk("./templates", func(path string, info os.FileInfo, err error) error {
 		if strings.Contains(path, ".html") {
-			_, err = tmpl.ParseFiles(path)
+			_, err = templates.ParseFiles(path)
 			return err
 		}
 		return err
 	})
-	return tmpl, err
 }
 
 var fMap = template.FuncMap{

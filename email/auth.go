@@ -14,13 +14,16 @@ type ContentLoginToken struct {
 // LoginToken creates and sends a login token email with provided template content.
 func (m *Mailer) LoginToken(name, address string, content ContentLoginToken) error {
 	msg := &message{
-		from:     NewEmail(m.fromName, m.from),
+		from:     m.from,
 		to:       NewEmail(name, address),
 		subject:  "Login Token",
 		template: "loginToken",
 		content:  content,
 	}
 
-	err := m.Send(msg)
-	return err
+	if err := msg.parse(); err != nil {
+		return err
+	}
+
+	return m.Send(msg)
 }

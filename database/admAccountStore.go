@@ -27,7 +27,7 @@ func NewAdmAccountStore(db *pg.DB) *AdmAccountStore {
 
 // List applies a filter and returns paginated array of matching results and total count.
 func (s *AdmAccountStore) List(f auth.AccountFilter) (*[]auth.Account, int, error) {
-	var a []auth.Account
+	a := []auth.Account{}
 	count, err := s.db.Model(&a).
 		Apply(f.Filter).
 		SelectAndCount()

@@ -103,8 +103,7 @@ func (rs *AccountResource) update(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	acc = data.Account
-	if err := rs.Store.Update(acc); err != nil {
+	if err := rs.Store.Update(data.Account); err != nil {
 		switch err.(type) {
 		case validation.Errors:
 			render.Render(w, r, ErrValidation(err))

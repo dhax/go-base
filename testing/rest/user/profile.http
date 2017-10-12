@@ -6,10 +6,5 @@ PUT {{host}}/api/profile
 Authorization: {{jwtUser}}
 
 {
-    "email": "invalid",
-    "name": "test"
+    "theme": "dark"
 }
-###
-DELETE {{host}}/api/profile
-Authorization: {{jwtUser}}
-###

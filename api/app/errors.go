@@ -70,8 +70,11 @@ func ErrRender(err error) render.Renderer {
 }
 
 var (
-	// ErrBadRequest return status 400 Bad Request for malformed request body.
+	// ErrBadRequest returns status 400 Bad Request for malformed request body.
 	ErrBadRequest = &ErrResponse{HTTPStatusCode: http.StatusBadRequest, StatusText: http.StatusText(http.StatusBadRequest)}
+
+	// ErrUnauthorized returns 401 Unauthorized.
+	ErrUnauthorized = &ErrResponse{HTTPStatusCode: http.StatusUnauthorized, StatusText: http.StatusText(http.StatusUnauthorized)}
 
 	// ErrNotFound returns status 404 Not Found for invalid resource request.
 	ErrNotFound = &ErrResponse{HTTPStatusCode: http.StatusNotFound, StatusText: http.StatusText(http.StatusNotFound)}

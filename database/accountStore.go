@@ -23,7 +23,7 @@ func (s *AccountStore) Get(id int) (*auth.Account, error) {
 	a := auth.Account{ID: id}
 	err := s.db.Model(&a).
 		Where("account.id = ?id").
-		Column("account.*", "Profile", "Token").
+		Column("account.*", "Token").
 		First()
 	return &a, err
 }
@@ -65,11 +65,5 @@ func (s *AccountStore) UpdateToken(t *auth.Token) error {
 // DeleteToken deletes a jwt refresh token.
 func (s *AccountStore) DeleteToken(t *auth.Token) error {
 	err := s.db.Delete(t)
-	return err
-}
-
-// UpdateProfile updates corresponding account profile.
-func (s *AccountStore) UpdateProfile(p *models.Profile) error {
-	err := s.db.Update(p)
 	return err
 }

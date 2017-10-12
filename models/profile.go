@@ -10,9 +10,8 @@ import (
 
 // Profile holds specific application settings linked to an Account.
 type Profile struct {
-	ID        int       `json:"id,omitempty"`
+	ID        int       `json:"-"`
 	AccountID int       `json:"-"`
-	CreatedAt time.Time `json:"created_at,omitempty"`
 	UpdatedAt time.Time `json:"updated_at,omitempty"`
 
 	Theme string `json:"theme,omitempty"`
@@ -20,11 +19,7 @@ type Profile struct {
 
 // BeforeInsert hook executed before database insert operation.
 func (p *Profile) BeforeInsert(db orm.DB) error {
-	now := time.Now()
-	if p.CreatedAt.IsZero() {
-		p.CreatedAt = now
-		p.UpdatedAt = now
-	}
+	p.UpdatedAt = time.Now()
 	return nil
 }
 

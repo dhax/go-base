@@ -23,11 +23,4 @@ Authorization: {{jwtUser}}
 ###
 DELETE {{host}}/api/account/token/1
 Authorization: {{jwtUser}}
-###
-PUT {{host}}/api/account/profile
-Authorization: {{jwtUser}}
 
-{
-    "id": 3,
-    "theme": "dark"
-}

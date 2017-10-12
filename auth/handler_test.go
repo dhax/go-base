@@ -30,7 +30,7 @@ var (
 
 func TestMain(m *testing.M) {
 	viper.SetDefault("auth_login_token_length", 8)
-	viper.SetDefault("auth_login_token_expiry", 11)
+	viper.SetDefault("auth_login_token_expiry", "11m")
 	viper.SetDefault("auth_jwt_secret", "random")
 	viper.SetDefault("log_level", "error")
 

@@ -5,7 +5,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/dhax/go-base/models"
 	"github.com/go-chi/jwtauth"
 	validation "github.com/go-ozzo/ozzo-validation"
 	"github.com/go-ozzo/ozzo-validation/is"
@@ -24,8 +23,7 @@ type Account struct {
 	Active bool     `sql:",notnull" json:"active"`
 	Roles  []string `pg:",array" json:"roles,omitempty"`
 
-	Profile *models.Profile `json:"profile,omitempty"`
-	Token   []*Token        `json:"token,omitempty"`
+	Token []*Token `json:"token,omitempty"`
 }
 
 // BeforeInsert hook executed before database insert operation.

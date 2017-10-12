@@ -11,7 +11,6 @@ import (
 	validation "github.com/go-ozzo/ozzo-validation"
 
 	"github.com/dhax/go-base/auth"
-	"github.com/dhax/go-base/logging"
 	"github.com/dhax/go-base/models"
 )
 
@@ -54,11 +53,11 @@ func (rs *AccountResource) router() *chi.Mux {
 func (rs *AccountResource) accountCtx(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		claims := auth.ClaimsFromCtx(r.Context())
-		logging.GetLogEntry(r).WithField("account_id", claims.ID)
+		log(r).WithField("account_id", claims.ID)
 		account, err := rs.Store.Get(claims.ID)
 		if err != nil {
 			// account deleted while access token still valid
-			logging.GetLogEntry(r).WithField("account", claims.Sub).Warn(err)
+			log(r).WithField("account", claims.Sub).Warn(err)
 			render.Render(w, r, ErrNotFound)
 			return
 		}

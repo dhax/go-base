@@ -1,10 +1,14 @@
 package app
 
 import (
+	"net/http"
+
 	"github.com/go-chi/chi"
 	"github.com/go-pg/pg"
+	"github.com/sirupsen/logrus"
 
 	"github.com/dhax/go-base/database"
+	"github.com/dhax/go-base/logging"
 )
 
 type ctxKey int
@@ -36,4 +40,8 @@ func (a *API) Router() *chi.Mux {
 	r.Mount("/account", a.Account.router())
 
 	return r
+}
+
+func log(r *http.Request) logrus.FieldLogger {
+	return logging.GetLogEntry(r)
 }

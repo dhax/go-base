@@ -25,11 +25,8 @@ func (p *Profile) BeforeInsert(db orm.DB) error {
 
 // BeforeUpdate hook executed before database update operation.
 func (p *Profile) BeforeUpdate(db orm.DB) error {
-	if err := p.Validate(); err != nil {
-		return err
-	}
 	p.UpdatedAt = time.Now()
-	return nil
+	return p.Validate()
 }
 
 // Validate validates Profile struct and returns validation errors.

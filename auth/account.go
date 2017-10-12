@@ -33,10 +33,7 @@ func (a *Account) BeforeInsert(db orm.DB) error {
 		a.CreatedAt = now
 		a.UpdatedAt = now
 	}
-	if err := a.Validate(); err != nil {
-		return err
-	}
-	return nil
+	return a.Validate()
 }
 
 // BeforeUpdate hook executed before database update operation.

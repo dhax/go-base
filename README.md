@@ -55,17 +55,17 @@ A deployed version can also be found on [Heroku](https://govue.herokuapp.com)
 
 Name | Type | Default | Description
 ---|---|---|---
-PORT | int | 3000 | http port
+PORT | string | localhost:3000 | http address (accepts also port number only for heroku compability)  
 LOG_LEVEL | string | debug | log level
 LOG_TEXTLOGGING | bool | false | defaults to json logging
 DATABASE_URL | string | postgres://postgres:postgres<br>@localhost:5432/gobase?sslmode=disable | PostgreSQL connection string
 AUTH_LOGIN_URL | string | http://localhost:3000/login | client login url as sent in login token email
 AUTH_LOGIN_TOKEN_LENGTH | int | 8 | length of login token
-AUTH_LOGIN_TOKEN_EXPIRY | int | 11 | login token expiry in minutes
-AUTH_JWT_SECRET | string | random | jwt sign and verify key - value "random" sets random 32 char secret at startup
-AUTH_JWT_EXPIRY | int | 15 | jwt access token expiry in minutes
-AUTH_JWT_REFRESH_EXPIRY | int | 60 | jwt refresh token expiry in minutes
-EMAIL_SMTP_HOST | string || email smtp host<br>(if set and connection can't be established then app panics)
+AUTH_LOGIN_TOKEN_EXPIRY | time.Duration | 11m | login token expiry
+AUTH_JWT_SECRET | string | random | jwt sign and verify key - value "random" creates random 32 char secret at startup (and automatically invalidates existing tokens on app restarts, so during dev you might want to set a fixed value here)
+AUTH_JWT_EXPIRY | time.Duration | 15m | jwt access token expiry
+AUTH_JWT_REFRESH_EXPIRY | time.Duration | 1h | jwt refresh token expiry
+EMAIL_SMTP_HOST | string || email smtp host (if set and connection can't be established then app panics)
 EMAIL_SMTP_PORT | int || email smtp port
 EMAIL_SMTP_USER | string || email smtp username
 EMAIL_SMTP_PASSWORD | string || email smtp password

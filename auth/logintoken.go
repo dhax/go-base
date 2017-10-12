@@ -44,7 +44,7 @@ func (a *LoginTokenAuth) CreateToken(id int) LoginToken {
 	lt := LoginToken{
 		Token:     randStringBytes(a.loginTokenLength),
 		AccountID: id,
-		Expiry:    time.Now().Add(time.Minute * a.loginTokenExpiry),
+		Expiry:    time.Now().Add(a.loginTokenExpiry),
 	}
 	a.add(lt)
 	a.purgeExpired()

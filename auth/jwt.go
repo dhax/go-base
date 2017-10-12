@@ -59,7 +59,7 @@ func (a *TokenAuth) GenTokenPair(ca jwtauth.Claims, cr jwtauth.Claims) (string, 
 // CreateJWT returns an access token for provided account claims.
 func (a *TokenAuth) CreateJWT(c jwtauth.Claims) (string, error) {
 	c.SetIssuedNow()
-	c.SetExpiryIn(a.jwtExpiry * time.Minute)
+	c.SetExpiryIn(a.jwtExpiry)
 	_, tokenString, err := a.JwtAuth.Encode(c)
 	return tokenString, err
 }
@@ -67,7 +67,7 @@ func (a *TokenAuth) CreateJWT(c jwtauth.Claims) (string, error) {
 // CreateRefreshJWT returns a refresh token for provided token Claims.
 func (a *TokenAuth) CreateRefreshJWT(c jwtauth.Claims) (string, error) {
 	c.SetIssuedNow()
-	c.SetExpiryIn(time.Minute * a.jwtRefreshExpiry)
+	c.SetExpiryIn(a.jwtRefreshExpiry)
 	_, tokenString, err := a.JwtAuth.Encode(c)
 	return tokenString, err
 }

@@ -130,7 +130,7 @@ func (rs *Resource) token(w http.ResponseWriter, r *http.Request) {
 
 	token := &Token{
 		Token:      uuid.NewV4().String(),
-		Expiry:     time.Now().Add(time.Minute * rs.Token.jwtRefreshExpiry),
+		Expiry:     time.Now().Add(rs.Token.jwtRefreshExpiry),
 		UpdatedAt:  time.Now(),
 		AccountID:  acc.ID,
 		Mobile:     ua.Mobile(),
@@ -184,7 +184,7 @@ func (rs *Resource) refresh(w http.ResponseWriter, r *http.Request) {
 	}
 
 	token.Token = uuid.NewV4().String()
-	token.Expiry = time.Now().Add(time.Minute * rs.Token.jwtRefreshExpiry)
+	token.Expiry = time.Now().Add(rs.Token.jwtRefreshExpiry)
 	token.UpdatedAt = time.Now()
 
 	access, refresh, err := rs.Token.GenTokenPair(acc.Claims(), token.Claims())

@@ -1,8 +1,7 @@
 package migrate
 
 import (
-	"fmt"
-	"os"
+	"log"
 
 	"github.com/dhax/go-base/database"
 	"github.com/go-pg/migrations"
@@ -13,7 +12,7 @@ import (
 func Migrate(args []string) {
 	db, err := database.DBConn()
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 
 	err = db.RunInTransaction(func(tx *pg.Tx) error {
@@ -22,14 +21,14 @@ func Migrate(args []string) {
 			return err
 		}
 		if newVersion != oldVersion {
-			fmt.Printf("migrated from version %d to %d\n", oldVersion, newVersion)
+			log.Printf("migrated from version %d to %d\n", oldVersion, newVersion)
 		} else {
-			fmt.Printf("version is %d\n", oldVersion)
+			log.Printf("version is %d\n", oldVersion)
 		}
 		return nil
 	})
 	if err != nil {
-		exitf(err.Error())
+		log.Fatal(err)
 	}
 
 }
@@ -38,12 +37,12 @@ func Migrate(args []string) {
 func Reset() {
 	db, err := database.DBConn()
 	if err != nil {
-		exitf(err.Error())
+		log.Fatal(err)
 	}
 
 	version, err := migrations.Version(db)
 	if err != nil {
-		exitf(err.Error())
+		log.Fatal(err)
 	}
 
 	err = db.RunInTransaction(func(tx *pg.Tx) error {
@@ -52,21 +51,12 @@ func Reset() {
 			if err != nil {
 				return err
 			}
-			fmt.Printf("migrated from version %d to %d\n", oldVersion, newVersion)
+			log.Printf("migrated from version %d to %d\n", oldVersion, newVersion)
 			version = newVersion
 		}
 		return nil
 	})
 	if err != nil {
-		exitf(err.Error())
+		log.Fatal(err)
 	}
-}
-
-func errorf(s string, args ...interface{}) {
-	fmt.Fprintf(os.Stderr, s+"\n", args...)
-}
-
-func exitf(s string, args ...interface{}) {
-	errorf(s, args...)
-	os.Exit(1)
 }

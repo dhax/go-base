@@ -65,7 +65,7 @@ AUTH_LOGIN_TOKEN_EXPIRY | time.Duration | 11m | login token expiry
 AUTH_JWT_SECRET | string | random | jwt sign and verify key - value "random" creates random 32 char secret at startup (and automatically invalidates existing tokens on app restarts, so during dev you might want to set a fixed value here)
 AUTH_JWT_EXPIRY | time.Duration | 15m | jwt access token expiry
 AUTH_JWT_REFRESH_EXPIRY | time.Duration | 1h | jwt refresh token expiry
-EMAIL_SMTP_HOST | string || email smtp host (if set and connection can't be established then app panics)
+EMAIL_SMTP_HOST | string || email smtp host (if set and connection can't be established then app exits)
 EMAIL_SMTP_PORT | int || email smtp port
 EMAIL_SMTP_USER | string || email smtp username
 EMAIL_SMTP_PASSWORD | string || email smtp password

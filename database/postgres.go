@@ -1,7 +1,7 @@
 package database
 
 import (
-	"fmt"
+	"log"
 	"time"
 
 	"github.com/spf13/viper"
@@ -28,7 +28,7 @@ func DBConn() (*pg.DB, error) {
 			if err != nil {
 				panic(err)
 			}
-			fmt.Printf("%s %s\n", time.Since(event.StartTime), query)
+			log.Printf("%s %s\n", time.Since(event.StartTime), query)
 		})
 	}
 

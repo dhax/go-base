@@ -2,6 +2,7 @@ package logging
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 	"time"
 
@@ -39,7 +40,7 @@ func NewLogger() *logrus.Logger {
 	}
 	l, err := logrus.ParseLevel(level)
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 	Logger.Level = l
 	return Logger

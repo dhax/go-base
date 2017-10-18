@@ -15,6 +15,8 @@
 package cmd
 
 import (
+	"log"
+
 	"github.com/dhax/go-base/api"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -28,7 +30,7 @@ var serveCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		server, err := api.NewServer()
 		if err != nil {
-			panic(err)
+			log.Fatal(err)
 		}
 		server.Start()
 	},

@@ -23,23 +23,19 @@
 
 [[constraint]]
   name = "github.com/go-chi/chi"
-  version = "3.2.1"
+  version = "3.3.0"
 
 [[constraint]]
   name = "github.com/go-chi/cors"
   version = "1.0.0"
 
 [[constraint]]
-  name = "github.com/go-chi/jwtauth"
-  revision = "e701090bf80b87b3f81b27edf0559ab044b11181"
-# TODO: See https://github.com/go-chi/jwtauth/commit/6075ccf8678cf2c941c7e816937c8ebf93a0b25f
-# version = "^3.0.1"
+  name = "github.com/go-chi/docgen"
+  version = "1.0.2"
 
 [[constraint]]
-  name = "github.com/dgrijalva/jwt-go"
-  revision = "a539ee1a749a2b895533f979515ac7e6e0f5b650"
-# TODO: See https://github.com/dgrijalva/jwt-go/issues/221
-# version = "^v3.0.0"
+  name = "github.com/go-chi/jwtauth"
+  version = "3.1.1"
 
 [[constraint]]
   name = "github.com/go-chi/render"
@@ -51,11 +47,11 @@
 
 [[constraint]]
   name = "github.com/go-pg/migrations"
-  version = "6.0.3"
+  version = "6.0.4"
 
 [[constraint]]
   name = "github.com/go-pg/pg"
-  version = "6.6.0"
+  version = "6.6.4"
 
 [[constraint]]
   branch = "master"

@@ -17,6 +17,8 @@ func Update(db DB, model ...interface{}) error {
 
 type updateQuery struct {
 	q *Query
+
+	omitZero bool
 }
 
 var _ QueryAppender = (*updateQuery)(nil)
@@ -107,12 +109,18 @@ func (q updateQuery) appendSetStruct(b []byte, strct reflect.Value) ([]byte, err
 	}
 
 	if len(fields) == 0 {
-		fields = q.q.model.Table().Columns
+		fields = q.q.model.Table().DataFields
 	}
 
-	for i, f := range fields {
-		if i > 0 {
+	pos := len(b)
+	for _, f := range fields {
+		if q.omitZero && f.OmitZero(strct) {
+			continue
+		}
+
+		if len(b) != pos {
 			b = append(b, ", "...)
+			pos = len(b)
 		}
 
 		b = append(b, f.Column...)
@@ -129,7 +137,7 @@ func (q updateQuery) appendSetSlice(b []byte, slice reflect.Value) ([]byte, erro
 	}
 
 	if len(fields) == 0 {
-		fields = q.q.model.Table().Columns
+		fields = q.q.model.Table().DataFields
 	}
 
 	for i, f := range fields {

@@ -21,16 +21,44 @@ var (
 	ErrExpired      = errors.New("jwtauth: token is expired")
 )
 
+var (
+	// TokenFromCookie tries to retreive the token string from a cookie named
+	// "jwt".
+	TokenFromCookie = func(r *http.Request) string {
+		cookie, err := r.Cookie("jwt")
+		if err != nil {
+			return ""
+		}
+		return cookie.Value
+	}
+	// TokenFromHeader tries to retreive the token string from the
+	// "Authorization" reqeust header: "Authorization: BEARER T".
+	TokenFromHeader = func(r *http.Request) string {
+		// Get token from authorization header.
+		bearer := r.Header.Get("Authorization")
+		if len(bearer) > 7 && strings.ToUpper(bearer[0:6]) == "BEARER" {
+			return bearer[7:]
+		}
+		return ""
+	}
+	// TokenFromQuery tries to retreive the token string from the "jwt" URI
+	// query parameter.
+	TokenFromQuery = func(r *http.Request) string {
+		// Get token from query param named "jwt".
+		return r.URL.Query().Get("jwt")
+	}
+)
+
 type JwtAuth struct {
-	signKey   []byte
-	verifyKey []byte
+	signKey   interface{}
+	verifyKey interface{}
 	signer    jwt.SigningMethod
 	parser    *jwt.Parser
 }
 
 // New creates a JwtAuth authenticator instance that provides middleware handlers
 // and encoding/decoding functions for JWT signing.
-func New(alg string, signKey []byte, verifyKey []byte) *JwtAuth {
+func New(alg string, signKey interface{}, verifyKey interface{}) *JwtAuth {
 	return NewWithParser(alg, &jwt.Parser{}, signKey, verifyKey)
 }
 
@@ -40,7 +68,7 @@ func New(alg string, signKey []byte, verifyKey []byte) *JwtAuth {
 // We explicitly toggle `SkipClaimsValidation` in the `jwt-go` parser so that
 // we can control when the claims are validated - in our case, by the Verifier
 // http middleware handler.
-func NewWithParser(alg string, parser *jwt.Parser, signKey []byte, verifyKey []byte) *JwtAuth {
+func NewWithParser(alg string, parser *jwt.Parser, signKey interface{}, verifyKey interface{}) *JwtAuth {
 	parser.SkipClaimsValidation = true
 	return &JwtAuth{
 		signKey:   signKey,
@@ -68,15 +96,15 @@ func NewWithParser(alg string, parser *jwt.Parser, signKey []byte, verifyKey []b
 // http response.
 func Verifier(ja *JwtAuth) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
-		return Verify(ja, "")(next)
+		return Verify(ja, TokenFromQuery, TokenFromHeader, TokenFromCookie)(next)
 	}
 }
 
-func Verify(ja *JwtAuth, paramAliases ...string) func(http.Handler) http.Handler {
+func Verify(ja *JwtAuth, findTokenFns ...func(r *http.Request) string) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		hfn := func(w http.ResponseWriter, r *http.Request) {
 			ctx := r.Context()
-			token, err := VerifyRequest(ja, r, paramAliases...)
+			token, err := VerifyRequest(ja, r, findTokenFns...)
 			ctx = NewContext(ctx, token, err)
 			next.ServeHTTP(w, r.WithContext(ctx))
 		}
@@ -84,37 +112,17 @@ func Verify(ja *JwtAuth, paramAliases ...string) func(http.Handler) http.Handler
 	}
 }
 
-func VerifyRequest(ja *JwtAuth, r *http.Request, paramAliases ...string) (*jwt.Token, error) {
+func VerifyRequest(ja *JwtAuth, r *http.Request, findTokenFns ...func(r *http.Request) string) (*jwt.Token, error) {
 	var tokenStr string
 	var err error
 
-	// Get token from query params
-	tokenStr = r.URL.Query().Get("jwt")
-
-	// Get token from other param aliases
-	if tokenStr == "" && paramAliases != nil && len(paramAliases) > 0 {
-		for _, p := range paramAliases {
-			tokenStr = r.URL.Query().Get(p)
-			if tokenStr != "" {
-				break
-			}
-		}
-	}
-
-	// Get token from authorization header
-	if tokenStr == "" {
-		bearer := r.Header.Get("Authorization")
-		if len(bearer) > 7 && strings.ToUpper(bearer[0:6]) == "BEARER" {
-			tokenStr = bearer[7:]
-		}
-	}
-
-	// Get token from cookie
-	if tokenStr == "" {
-		// TODO: paramAliases should apply to cookies too..
-		cookie, err := r.Cookie("jwt")
-		if err == nil {
-			tokenStr = cookie.Value
+	// Extract token string from the request by calling token find functions in
+	// the order they where provided. Further extraction stops if a function
+	// returns a non-empty string.
+	for _, fn := range findTokenFns {
+		tokenStr = fn(r)
+		if tokenStr != "" {
+			break
 		}
 	}
 
@@ -127,24 +135,17 @@ func VerifyRequest(ja *JwtAuth, r *http.Request, paramAliases ...string) (*jwt.T
 		case "token is expired":
 			err = ErrExpired
 		}
-
-		// ctx = NewContext(ctx, token, err)
-		// next.ServeHTTP(w, r.WithContext(ctx))
 		return token, err
 	}
 
 	if token == nil || !token.Valid || token.Method != ja.signer {
 		err = ErrUnauthorized
-		// ctx = NewContext(ctx, token, err)
-		// next.ServeHTTP(w, r.WithContext(ctx))
 		return token, err
 	}
 
 	// Check expiry via "exp" claim
 	if IsExpired(token) {
 		err = ErrExpired
-		// ctx = NewContext(ctx, token, err)
-		// next.ServeHTTP(w, r.WithContext(ctx))
 		return token, err
 	}
 
@@ -173,7 +174,7 @@ func (ja *JwtAuth) Decode(tokenString string) (t *jwt.Token, err error) {
 }
 
 func (ja *JwtAuth) keyFunc(t *jwt.Token) (interface{}, error) {
-	if ja.verifyKey != nil && len(ja.verifyKey) > 0 {
+	if ja.verifyKey != nil {
 		return ja.verifyKey, nil
 	} else {
 		return ja.signKey, nil

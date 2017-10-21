@@ -188,7 +188,7 @@ func (q *Query) getDataFields() ([]*Field, error) {
 	return q._getFields(true)
 }
 
-func (q *Query) _getFields(filterPKs bool) ([]*Field, error) {
+func (q *Query) _getFields(omitPKs bool) ([]*Field, error) {
 	table := q.model.Table()
 
 	var columns []*Field
@@ -203,7 +203,7 @@ func (q *Query) _getFields(filterPKs bool) ([]*Field, error) {
 			return nil, err
 		}
 
-		if filterPKs && field.HasFlag(PrimaryKeyFlag) {
+		if omitPKs && field.HasFlag(PrimaryKeyFlag) {
 			continue
 		}
 
@@ -595,10 +595,16 @@ func (q *Query) SelectOrInsert(values ...interface{}) (inserted bool, err error)
 		return false, q.stickyErr
 	}
 
+	insertq := q
+	if len(insertq.columns) > 0 {
+		insertq = insertq.Copy()
+		insertq.columns = nil
+	}
+
 	var insertErr error
 	for i := 0; i < 5; i++ {
 		if i >= 2 {
-			time.Sleep(internal.RetryBackoff(i-2, 250*time.Millisecond, 4*time.Second))
+			time.Sleep(internal.RetryBackoff(i-2, 250*time.Millisecond, 5*time.Second))
 		}
 
 		err := q.Select(values...)
@@ -609,7 +615,7 @@ func (q *Query) SelectOrInsert(values ...interface{}) (inserted bool, err error)
 			return false, err
 		}
 
-		res, err := q.Insert(values...)
+		res, err := insertq.Insert(values...)
 		if err != nil {
 			insertErr = err
 			if pgErr, ok := err.(internal.PGError); ok {
@@ -636,12 +642,21 @@ func (q *Query) SelectOrInsert(values ...interface{}) (inserted bool, err error)
 }
 
 // Update updates the model.
-func (q *Query) Update(values ...interface{}) (Result, error) {
+func (q *Query) Update(scan ...interface{}) (Result, error) {
+	return q.update(scan, false)
+}
+
+// Update updates the model omitting null columns.
+func (q *Query) UpdateNotNull(scan ...interface{}) (Result, error) {
+	return q.update(scan, true)
+}
+
+func (q *Query) update(scan []interface{}, omitZero bool) (Result, error) {
 	if q.stickyErr != nil {
 		return nil, q.stickyErr
 	}
 
-	model, err := q.newModel(values...)
+	model, err := q.newModel(scan...)
 	if err != nil {
 		return nil, err
 	}
@@ -652,7 +667,7 @@ func (q *Query) Update(values ...interface{}) (Result, error) {
 		}
 	}
 
-	res, err := q.db.Query(model, updateQuery{q}, q.model)
+	res, err := q.db.Query(model, updateQuery{q: q, omitZero: omitZero}, q.model)
 	if err != nil {
 		return nil, err
 	}

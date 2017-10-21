@@ -80,6 +80,7 @@ func RunMigrations(db DB, migrations []Migration, a ...string) (oldVersion, newV
 	if err != nil {
 		return
 	}
+	newVersion = oldVersion
 
 	switch cmd {
 	case "create":

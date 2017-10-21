@@ -1,5 +1,6 @@
 jwtauth - JWT authentication middleware for Go HTTP services
 ============================================================
+[![GoDoc Widget]][GoDoc]
 
 The `jwtauth` http middleware package provides a simple way to verify a JWT token
 from a http request and send the result down the request context (`context.Context`).
@@ -22,12 +23,11 @@ plain-text payload for all unverified tokens and passes the good ones through. Y
 also copy the Authenticator and customize it to handle invalid tokens to better fit
 your flow (ie. with a JSON error response body).
 
-The `Verifier` will search for a JWT token in a http request, in the order:
+By default, the `Verifier` will search for a JWT token in a http request, in the order:
 
 1. 'jwt' URI query parameter
 2. 'Authorization: BEARER T' request header
-3. Cookie 'jwt' value
-4. (optional), use `jwtauth.Verify("state")` for additional query/cookie parameter aliases
+3. 'jwt' Cookie value
 
 The first JWT string that is found as a query parameter, authorization header
 or cookie header is then decoded by the `jwt-go` library and a *jwt.Token
@@ -38,6 +38,11 @@ The Verifier always calls the next http handler in sequence, which can either
 be the generic `jwtauth.Authenticator` middleware or your own custom handler
 which checks the request context jwt token and error to prepare a custom
 http response.
+
+Note: jwtauth supports custom verification sequences for finding a token
+from a request by using the `Verify` middleware instantiator directly. The default
+`Verifier` is instantiated by calling `Verify(ja, TokenFromQuery, TokenFromHeader, TokenFromCookie)`.
+
 
 # Usage
 
@@ -105,3 +110,6 @@ func router() http.Handler {
 # LICENSE
 
 [MIT](/LICENSE)
+
+[GoDoc]: https://godoc.org/github.com/go-chi/jwtauth
+[GoDoc Widget]: https://godoc.org/github.com/go-chi/jwtauth?status.svg

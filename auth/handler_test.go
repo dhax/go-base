@@ -15,7 +15,6 @@ import (
 
 	"github.com/dhax/go-base/email"
 	"github.com/dhax/go-base/logging"
-	"github.com/dhax/go-base/testing/mock"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/jwtauth"
 	"github.com/spf13/viper"
@@ -24,7 +23,7 @@ import (
 var (
 	auth      *Resource
 	authstore MockStorer
-	mailer    mock.Mailer
+	mailer    email.MockMailer
 	ts        *httptest.Server
 )
 

@@ -1,3 +1,4 @@
+// Package database implements postgres connection and queries.
 package database
 
 import (

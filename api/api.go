@@ -1,3 +1,4 @@
+// Package api configures an http server for administration and application resources.
 package api
 
 import (
@@ -19,8 +20,8 @@ import (
 	"github.com/go-chi/render"
 )
 
-// NewAPI configures application resources and routes.
-func NewAPI() (*chi.Mux, error) {
+// New configures application resources and routes.
+func New() (*chi.Mux, error) {
 	logger := logging.NewLogger()
 
 	db, err := database.DBConn()

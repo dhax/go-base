@@ -241,14 +241,16 @@ func TestAuthResource_refresh(t *testing.T) {
 			if tc.status == http.StatusUnauthorized && authstore.SaveRefreshTokenInvoked {
 				t.Errorf("SaveRefreshToken invoked for status %d", tc.status)
 			}
-			if tc.status == http.StatusOK && !authstore.GetByRefreshTokenInvoked {
-				t.Errorf("GetRefreshToken not invoked")
-			}
-			if tc.status == http.StatusOK && !authstore.SaveRefreshTokenInvoked {
-				t.Errorf("SaveRefreshToken not invoked")
-			}
-			if tc.status == http.StatusOK && authstore.DeleteRefreshTokenInvoked {
-				t.Errorf("DeleteRefreshToken should not be invoked")
+			if tc.status == http.StatusOK {
+				if !authstore.GetByRefreshTokenInvoked {
+					t.Errorf("GetRefreshToken not invoked")
+				}
+				if !authstore.SaveRefreshTokenInvoked {
+					t.Errorf("SaveRefreshToken not invoked")
+				}
+				if authstore.DeleteRefreshTokenInvoked {
+					t.Errorf("DeleteRefreshToken should not be invoked")
+				}
 			}
 			authstore.GetByRefreshTokenInvoked = false
 			authstore.SaveRefreshTokenInvoked = false

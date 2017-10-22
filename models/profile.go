@@ -1,3 +1,4 @@
+// Package models contains application specific entities.
 package models
 
 import (

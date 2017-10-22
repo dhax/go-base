@@ -1,3 +1,5 @@
+// Package auth provides JSON Web Token (JWT) authentication and authorization middleware.
+// It implements a passwordless authentication flow by sending login tokens vie email which are then exchanged for JWT access and refresh tokens.
 package auth
 
 import (
@@ -59,7 +61,7 @@ func NewResource(store Storer, mailer Mailer) (*Resource, error) {
 	return resource, nil
 }
 
-// Router provides neccessary routes for passwordless authentication flow.
+// Router provides necessary routes for passwordless authentication flow.
 func (rs *Resource) Router() *chi.Mux {
 	r := chi.NewRouter()
 	r.Use(render.SetContentType(render.ContentTypeJSON))

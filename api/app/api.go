@@ -1,3 +1,4 @@
+// Package app ties together application resources and handlers.
 package app
 
 import (

@@ -61,7 +61,7 @@ func init() {
 }
 
 func genRoutesDoc() {
-	api, _ := api.NewAPI()
+	api, _ := api.New()
 	fmt.Print("generating routes markdown file: ")
 	md := docgen.MarkdownRoutesDoc(api, docgen.MarkdownOpts{
 		ProjectPath: "github.com/dhax/go-base",

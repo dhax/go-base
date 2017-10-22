@@ -22,7 +22,7 @@ type AccountStore interface {
 	DeleteToken(*auth.Token) error
 }
 
-// AccountResource implements account managment handler.
+// AccountResource implements account management handler.
 type AccountResource struct {
 	Store AccountStore
 }
@@ -64,7 +64,7 @@ func (rs *AccountResource) accountCtx(next http.Handler) http.Handler {
 
 type accountRequest struct {
 	*auth.Account
-	// override protected data here, although not really neccessary here
+	// override protected data here, although not really necessary here
 	// as we limit updated database columns in store as well
 	ProtectedID     int      `json:"id"`
 	ProtectedActive bool     `json:"active"`

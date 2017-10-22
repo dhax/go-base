@@ -1,3 +1,4 @@
+// Package migrate implements postgres migrations.
 package migrate
 
 import (

@@ -1,5 +1,6 @@
+# Go Restful API Boilerplate
 
-## Go Restful API Boilerplate
+[![GoDoc Badge]][GoDoc] [![GoReportCard Badge]][GoReportCard]
 
 Easily extendible RESTful API boilerplate aiming to follow idiomatic go and best practice.
 
@@ -75,3 +76,8 @@ EMAIL_FROM_NAME | string || from name used in sending emails
 ### Contributing
 
 Any feedback and pull requests are welcome and highly appreciated. Please open an issue first if you intend to send in a larger pull request or want to add additional features.
+
+[GoDoc]: https://godoc.org/github.com/dhax/go-base
+[GoDoc Badge]: https://godoc.org/github.com/dhax/go-base?status.svg
+[GoReportCard]: https://goreportcard.com/report/github.com/dhax/go-base
+[GoReportCard Badge]: https://goreportcard.com/badge/github.com/dhax/go-base

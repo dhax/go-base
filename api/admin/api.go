@@ -1,3 +1,4 @@
+// Package admin ties together administration resources and handlers.
 package admin
 
 import (

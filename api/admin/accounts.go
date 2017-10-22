@@ -27,7 +27,7 @@ type AccountStore interface {
 	Delete(*auth.Account) error
 }
 
-// AccountResource implements account managment handler.
+// AccountResource implements account management handler.
 type AccountResource struct {
 	Store AccountStore
 }

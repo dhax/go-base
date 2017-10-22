@@ -1,3 +1,4 @@
+// Package logging provides structured logging with logrus.
 package logging
 
 import (
@@ -93,7 +94,7 @@ func (l *StructuredLoggerEntry) Write(status, bytes int, elapsed time.Duration) 
 	l.Logger = l.Logger.WithFields(logrus.Fields{
 		"resp_status":       status,
 		"resp_bytes_length": bytes,
-		"resp_elasped_ms":   float64(elapsed.Nanoseconds()) / 1000000.0,
+		"resp_elapsed_ms":   float64(elapsed.Nanoseconds()) / 1000000.0,
 	})
 
 	l.Logger.Infoln("request complete")

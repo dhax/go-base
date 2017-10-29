@@ -33,12 +33,9 @@ func (body *loginRequest) Bind(r *http.Request) error {
 	body.Email = strings.TrimSpace(body.Email)
 	body.Email = strings.ToLower(body.Email)
 
-	if err := validation.ValidateStruct(body,
+	return validation.ValidateStruct(body,
 		validation.Field(&body.Email, validation.Required, is.Email),
-	); err != nil {
-		return err
-	}
-	return nil
+	)
 }
 
 func (rs *Resource) login(w http.ResponseWriter, r *http.Request) {
@@ -91,12 +88,9 @@ type tokenResponse struct {
 func (body *tokenRequest) Bind(r *http.Request) error {
 	body.Token = strings.TrimSpace(body.Token)
 
-	if err := validation.ValidateStruct(body,
+	return validation.ValidateStruct(body,
 		validation.Field(&body.Token, validation.Required, is.Alphanumeric),
-	); err != nil {
-		return err
-	}
-	return nil
+	)
 }
 
 func (rs *Resource) token(w http.ResponseWriter, r *http.Request) {

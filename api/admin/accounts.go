@@ -20,7 +20,7 @@ var (
 
 // AccountStore defines database operations for account management.
 type AccountStore interface {
-	List(f auth.AccountFilter) (*[]auth.Account, int, error)
+	List(f auth.AccountFilter) ([]auth.Account, int, error)
 	Create(*auth.Account) error
 	Get(id int) (*auth.Account, error)
 	Update(*auth.Account) error
@@ -87,11 +87,11 @@ func newAccountResponse(a *auth.Account) *accountResponse {
 }
 
 type accountListResponse struct {
-	Accounts *[]auth.Account `json:"accounts"`
-	Count    int             `json:"count"`
+	Accounts []auth.Account `json:"accounts"`
+	Count    int            `json:"count"`
 }
 
-func newAccountListResponse(a *[]auth.Account, count int) *accountListResponse {
+func newAccountListResponse(a []auth.Account, count int) *accountListResponse {
 	resp := &accountListResponse{
 		Accounts: a,
 		Count:    count,

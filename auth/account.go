@@ -23,7 +23,7 @@ type Account struct {
 	Active bool     `sql:",notnull" json:"active"`
 	Roles  []string `pg:",array" json:"roles,omitempty"`
 
-	Token []*Token `json:"token,omitempty"`
+	Token []Token `json:"token,omitempty"`
 }
 
 // BeforeInsert hook executed before database insert operation.

@@ -1,9 +1,10 @@
-package auth
+package pwdless
 
 import (
 	"bytes"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -13,16 +14,18 @@ import (
 	"testing"
 	"time"
 
-	"github.com/dhax/go-base/email"
-	"github.com/dhax/go-base/logging"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/jwtauth"
 	"github.com/spf13/viper"
+
+	"github.com/dhax/go-base/auth/jwt"
+	"github.com/dhax/go-base/email"
+	"github.com/dhax/go-base/logging"
 )
 
 var (
 	auth      *Resource
-	authstore MockStorer
+	authStore MockAuthStore
 	mailer    email.MockMailer
 	ts        *httptest.Server
 )
@@ -34,8 +37,9 @@ func TestMain(m *testing.M) {
 	viper.SetDefault("log_level", "error")
 
 	var err error
-	auth, err = NewResource(&authstore, &mailer)
+	auth, err = NewResource(&authStore, &mailer)
 	if err != nil {
+		fmt.Println(err)
 		os.Exit(1)
 	}
 
@@ -51,7 +55,7 @@ func TestMain(m *testing.M) {
 }
 
 func TestAuthResource_login(t *testing.T) {
-	authstore.GetByEmailFn = func(email string) (*Account, error) {
+	authStore.GetAccountByEmailFn = func(email string) (*Account, error) {
 		var err error
 		a := Account{
 			ID:    1,
@@ -100,20 +104,20 @@ func TestAuthResource_login(t *testing.T) {
 			if tc.err != nil && !strings.Contains(body, tc.err.Error()) {
 				t.Errorf(" got: %s, expected to contain: %s", body, tc.err.Error())
 			}
-			if tc.err == ErrInvalidLogin && authstore.GetByEmailInvoked {
+			if tc.err == ErrInvalidLogin && authStore.GetAccountByEmailInvoked {
 				t.Error("GetByLoginToken invoked for invalid email")
 			}
 			if tc.err == nil && !mailer.LoginTokenInvoked {
 				t.Error("emailService.LoginToken not invoked")
 			}
-			authstore.GetByEmailInvoked = false
+			authStore.GetAccountByEmailInvoked = false
 			mailer.LoginTokenInvoked = false
 		})
 	}
 }
 
 func TestAuthResource_token(t *testing.T) {
-	authstore.GetByIDFn = func(id int) (*Account, error) {
+	authStore.GetAccountFn = func(id int) (*Account, error) {
 		var err error
 		a := Account{
 			ID:     id,
@@ -130,11 +134,11 @@ func TestAuthResource_token(t *testing.T) {
 		}
 		return &a, err
 	}
-	authstore.UpdateAccountFn = func(a *Account) error {
+	authStore.UpdateAccountFn = func(a *Account) error {
 		a.LastLogin = time.Now()
 		return nil
 	}
-	authstore.SaveRefreshTokenFn = func(a *Token) error {
+	authStore.CreateOrUpdateTokenFn = func(a *jwt.Token) error {
 		return nil
 	}
 
@@ -154,7 +158,7 @@ func TestAuthResource_token(t *testing.T) {
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			token := auth.Login.CreateToken(tc.id)
+			token := auth.LoginAuth.CreateToken(tc.id)
 			if tc.token != "" {
 				token.Token = tc.token
 			}
@@ -171,25 +175,37 @@ func TestAuthResource_token(t *testing.T) {
 			if tc.err != nil && !strings.Contains(body, tc.err.Error()) {
 				t.Errorf("got: %s, expected to contain: %s", body, tc.err.Error())
 			}
-			if tc.err == ErrLoginToken && authstore.SaveRefreshTokenInvoked {
-				t.Errorf("SaveRefreshToken invoked despite error %s", tc.err.Error())
+			if tc.err == ErrLoginToken && authStore.CreateOrUpdateTokenInvoked {
+				t.Errorf("CreateOrUpdate invoked despite error %s", tc.err.Error())
 			}
-			if tc.err == nil && !authstore.SaveRefreshTokenInvoked {
-				t.Error("SaveRefreshToken not invoked")
+			if tc.err == nil && !authStore.CreateOrUpdateTokenInvoked {
+				t.Error("CreateOrUpdate not invoked")
 			}
-			authstore.SaveRefreshTokenInvoked = false
+			authStore.CreateOrUpdateTokenInvoked = false
 		})
 	}
 }
 
 func TestAuthResource_refresh(t *testing.T) {
-	authstore.GetByRefreshTokenFn = func(token string) (*Account, *Token, error) {
-		var err error
+	authStore.GetAccountFn = func(id int) (*Account, error) {
 		a := Account{
 			Active: true,
 			Name:   "Test",
 		}
-		var t Token
+		switch id {
+		case 999:
+			a.Active = false
+		}
+		return &a, nil
+	}
+	authStore.UpdateAccountFn = func(a *Account) error {
+		a.LastLogin = time.Now()
+		return nil
+	}
+
+	authStore.GetTokenFn = func(token string) (*jwt.Token, error) {
+		var err error
+		var t jwt.Token
 		t.Expiry = time.Now().Add(1 * time.Minute)
 
 		switch token {
@@ -198,20 +214,14 @@ func TestAuthResource_refresh(t *testing.T) {
 		case "expired":
 			t.Expiry = time.Now().Add(-1 * time.Minute)
 		case "disabled":
-			a.Active = false
-		case "valid":
-			// unmodified
+			t.AccountID = 999
 		}
-		return &a, &t, err
+		return &t, err
 	}
-	authstore.UpdateAccountFn = func(a *Account) error {
-		a.LastLogin = time.Now()
+	authStore.CreateOrUpdateTokenFn = func(a *jwt.Token) error {
 		return nil
 	}
-	authstore.SaveRefreshTokenFn = func(a *Token) error {
-		return nil
-	}
-	authstore.DeleteRefreshTokenFn = func(t *Token) error {
+	authStore.DeleteTokenFn = func(t *jwt.Token) error {
 		return nil
 	}
 
@@ -222,8 +232,8 @@ func TestAuthResource_refresh(t *testing.T) {
 		status int
 		err    error
 	}{
-		{"notfound", "notfound", 1, http.StatusUnauthorized, errTokenExpired},
-		{"expired", "expired", -1, http.StatusUnauthorized, errTokenUnauthorized},
+		{"notfound", "notfound", 1, http.StatusUnauthorized, jwt.ErrTokenExpired},
+		{"expired", "expired", -1, http.StatusUnauthorized, jwt.ErrTokenUnauthorized},
 		{"disabled", "disabled", 1, http.StatusUnauthorized, ErrLoginDisabled},
 		{"valid", "valid", 1, http.StatusOK, nil},
 	}
@@ -238,32 +248,31 @@ func TestAuthResource_refresh(t *testing.T) {
 			if tc.err != nil && !strings.Contains(body, tc.err.Error()) {
 				t.Errorf("got: %s, expected error to contain: %s", body, tc.err.Error())
 			}
-			if tc.status == http.StatusUnauthorized && authstore.SaveRefreshTokenInvoked {
-				t.Errorf("SaveRefreshToken invoked for status %d", tc.status)
+			if tc.status == http.StatusUnauthorized && authStore.CreateOrUpdateTokenInvoked {
+				t.Errorf("CreateOrUpdate invoked for status %d", tc.status)
 			}
 			if tc.status == http.StatusOK {
-				if !authstore.GetByRefreshTokenInvoked {
-					t.Errorf("GetRefreshToken not invoked")
+				if !authStore.GetTokenInvoked {
+					t.Errorf("GetByToken not invoked")
 				}
-				if !authstore.SaveRefreshTokenInvoked {
-					t.Errorf("SaveRefreshToken not invoked")
+				if !authStore.CreateOrUpdateTokenInvoked {
+					t.Errorf("CreateOrUpdate not invoked")
 				}
-				if authstore.DeleteRefreshTokenInvoked {
-					t.Errorf("DeleteRefreshToken should not be invoked")
+				if authStore.DeleteTokenInvoked {
+					t.Errorf("Delete should not be invoked")
 				}
 			}
-			authstore.GetByRefreshTokenInvoked = false
-			authstore.SaveRefreshTokenInvoked = false
-			authstore.DeleteRefreshTokenInvoked = false
+			authStore.GetTokenInvoked = false
+			authStore.CreateOrUpdateTokenInvoked = false
+			authStore.DeleteTokenInvoked = false
 		})
 	}
 }
 
 func TestAuthResource_logout(t *testing.T) {
-	authstore.GetByRefreshTokenFn = func(token string) (*Account, *Token, error) {
+	authStore.GetTokenFn = func(token string) (*jwt.Token, error) {
 		var err error
-		var a Account
-		t := Token{
+		t := jwt.Token{
 			Expiry: time.Now().Add(1 * time.Minute),
 		}
 
@@ -271,9 +280,9 @@ func TestAuthResource_logout(t *testing.T) {
 		case "notfound":
 			err = errors.New("sql no rows")
 		}
-		return &a, &t, err
+		return &t, err
 	}
-	authstore.DeleteRefreshTokenFn = func(a *Token) error {
+	authStore.DeleteTokenFn = func(a *jwt.Token) error {
 		return nil
 	}
 
@@ -284,8 +293,8 @@ func TestAuthResource_logout(t *testing.T) {
 		status int
 		err    error
 	}{
-		{"notfound", "notfound", 1, http.StatusUnauthorized, errTokenExpired},
-		{"expired", "valid", -1, http.StatusUnauthorized, errTokenUnauthorized},
+		{"notfound", "notfound", 1, http.StatusUnauthorized, jwt.ErrTokenExpired},
+		{"expired", "valid", -1, http.StatusUnauthorized, jwt.ErrTokenUnauthorized},
 		{"valid", "valid", 1, http.StatusOK, nil},
 	}
 
@@ -299,10 +308,10 @@ func TestAuthResource_logout(t *testing.T) {
 			if tc.err != nil && !strings.Contains(body, tc.err.Error()) {
 				t.Errorf("got: %x, expected error to contain %s", body, tc.err.Error())
 			}
-			if tc.status == http.StatusUnauthorized && authstore.DeleteRefreshTokenInvoked {
-				t.Errorf("DeleteRefreshToken invoked for status %d", tc.status)
+			if tc.status == http.StatusUnauthorized && authStore.DeleteTokenInvoked {
+				t.Errorf("Delete invoked for status %d", tc.status)
 			}
-			authstore.DeleteRefreshTokenInvoked = false
+			authStore.DeleteTokenInvoked = false
 		})
 	}
 }
@@ -335,7 +344,7 @@ func testRequest(t *testing.T, ts *httptest.Server, method, path string, body io
 }
 
 func genJWT(c jwtauth.Claims) string {
-	_, tokenString, _ := auth.Token.JwtAuth.Encode(c)
+	_, tokenString, _ := auth.TokenAuth.JwtAuth.Encode(c)
 	return tokenString
 }
 

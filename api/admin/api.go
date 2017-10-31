@@ -9,7 +9,7 @@ import (
 	"github.com/go-chi/chi"
 	"github.com/go-pg/pg"
 
-	"github.com/dhax/go-base/auth"
+	"github.com/dhax/go-base/auth/authorize"
 	"github.com/dhax/go-base/database"
 	"github.com/dhax/go-base/logging"
 )
@@ -44,7 +44,7 @@ func NewAPI(db *pg.DB) (*API, error) {
 // Router provides admin application routes.
 func (a *API) Router() *chi.Mux {
 	r := chi.NewRouter()
-	r.Use(auth.RequiresRole(roleAdmin))
+	r.Use(authorize.RequiresRole(roleAdmin))
 
 	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("Hello Admin"))

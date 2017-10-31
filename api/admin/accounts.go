@@ -6,9 +6,9 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/dhax/go-base/auth/pwdless"
 	"github.com/go-ozzo/ozzo-validation"
 
-	"github.com/dhax/go-base/auth"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/render"
 )
@@ -20,11 +20,11 @@ var (
 
 // AccountStore defines database operations for account management.
 type AccountStore interface {
-	List(f auth.AccountFilter) ([]auth.Account, int, error)
-	Create(*auth.Account) error
-	Get(id int) (*auth.Account, error)
-	Update(*auth.Account) error
-	Delete(*auth.Account) error
+	List(f pwdless.AccountFilter) ([]pwdless.Account, int, error)
+	Create(*pwdless.Account) error
+	Get(id int) (*pwdless.Account, error)
+	Update(*pwdless.Account) error
+	Delete(*pwdless.Account) error
 }
 
 // AccountResource implements account management handler.
@@ -70,7 +70,7 @@ func (rs *AccountResource) accountCtx(next http.Handler) http.Handler {
 }
 
 type accountRequest struct {
-	*auth.Account
+	*pwdless.Account
 }
 
 func (d *accountRequest) Bind(r *http.Request) error {
@@ -78,20 +78,20 @@ func (d *accountRequest) Bind(r *http.Request) error {
 }
 
 type accountResponse struct {
-	*auth.Account
+	*pwdless.Account
 }
 
-func newAccountResponse(a *auth.Account) *accountResponse {
+func newAccountResponse(a *pwdless.Account) *accountResponse {
 	resp := &accountResponse{Account: a}
 	return resp
 }
 
 type accountListResponse struct {
-	Accounts []auth.Account `json:"accounts"`
-	Count    int            `json:"count"`
+	Accounts []pwdless.Account `json:"accounts"`
+	Count    int               `json:"count"`
 }
 
-func newAccountListResponse(a []auth.Account, count int) *accountListResponse {
+func newAccountListResponse(a []pwdless.Account, count int) *accountListResponse {
 	resp := &accountListResponse{
 		Accounts: a,
 		Count:    count,
@@ -100,7 +100,7 @@ func newAccountListResponse(a []auth.Account, count int) *accountListResponse {
 }
 
 func (rs *AccountResource) list(w http.ResponseWriter, r *http.Request) {
-	f := auth.NewAccountFilter(r.URL.Query())
+	f := pwdless.NewAccountFilter(r.URL.Query())
 	al, count, err := rs.Store.List(f)
 	if err != nil {
 		render.Render(w, r, ErrRender(err))
@@ -129,12 +129,12 @@ func (rs *AccountResource) create(w http.ResponseWriter, r *http.Request) {
 }
 
 func (rs *AccountResource) get(w http.ResponseWriter, r *http.Request) {
-	acc := r.Context().Value(ctxAccount).(*auth.Account)
+	acc := r.Context().Value(ctxAccount).(*pwdless.Account)
 	render.Respond(w, r, newAccountResponse(acc))
 }
 
 func (rs *AccountResource) update(w http.ResponseWriter, r *http.Request) {
-	acc := r.Context().Value(ctxAccount).(*auth.Account)
+	acc := r.Context().Value(ctxAccount).(*pwdless.Account)
 	data := &accountRequest{Account: acc}
 	if err := render.Bind(r, data); err != nil {
 		render.Render(w, r, ErrInvalidRequest(err))
@@ -155,7 +155,7 @@ func (rs *AccountResource) update(w http.ResponseWriter, r *http.Request) {
 }
 
 func (rs *AccountResource) delete(w http.ResponseWriter, r *http.Request) {
-	acc := r.Context().Value(ctxAccount).(*auth.Account)
+	acc := r.Context().Value(ctxAccount).(*pwdless.Account)
 	if err := rs.Store.Delete(acc); err != nil {
 		render.Render(w, r, ErrInvalidRequest(err))
 		return

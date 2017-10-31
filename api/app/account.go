@@ -10,16 +10,17 @@ import (
 	"github.com/go-chi/render"
 	validation "github.com/go-ozzo/ozzo-validation"
 
-	"github.com/dhax/go-base/auth"
+	"github.com/dhax/go-base/auth/jwt"
+	"github.com/dhax/go-base/auth/pwdless"
 )
 
 // AccountStore defines database operations for account.
 type AccountStore interface {
-	Get(id int) (*auth.Account, error)
-	Update(*auth.Account) error
-	Delete(*auth.Account) error
-	UpdateToken(*auth.Token) error
-	DeleteToken(*auth.Token) error
+	Get(id int) (*pwdless.Account, error)
+	Update(*pwdless.Account) error
+	Delete(*pwdless.Account) error
+	UpdateToken(*jwt.Token) error
+	DeleteToken(*jwt.Token) error
 }
 
 // AccountResource implements account management handler.
@@ -49,7 +50,7 @@ func (rs *AccountResource) router() *chi.Mux {
 
 func (rs *AccountResource) accountCtx(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		claims := auth.ClaimsFromCtx(r.Context())
+		claims := jwt.ClaimsFromCtx(r.Context())
 		log(r).WithField("account_id", claims.ID)
 		account, err := rs.Store.Get(claims.ID)
 		if err != nil {
@@ -63,7 +64,7 @@ func (rs *AccountResource) accountCtx(next http.Handler) http.Handler {
 }
 
 type accountRequest struct {
-	*auth.Account
+	*pwdless.Account
 	// override protected data here, although not really necessary here
 	// as we limit updated database columns in store as well
 	ProtectedID     int      `json:"id"`
@@ -78,21 +79,21 @@ func (d *accountRequest) Bind(r *http.Request) error {
 }
 
 type accountResponse struct {
-	*auth.Account
+	*pwdless.Account
 }
 
-func newAccountResponse(a *auth.Account) *accountResponse {
+func newAccountResponse(a *pwdless.Account) *accountResponse {
 	resp := &accountResponse{Account: a}
 	return resp
 }
 
 func (rs *AccountResource) get(w http.ResponseWriter, r *http.Request) {
-	acc := r.Context().Value(ctxAccount).(*auth.Account)
+	acc := r.Context().Value(ctxAccount).(*pwdless.Account)
 	render.Respond(w, r, newAccountResponse(acc))
 }
 
 func (rs *AccountResource) update(w http.ResponseWriter, r *http.Request) {
-	acc := r.Context().Value(ctxAccount).(*auth.Account)
+	acc := r.Context().Value(ctxAccount).(*pwdless.Account)
 	data := &accountRequest{Account: acc}
 	if err := render.Bind(r, data); err != nil {
 		render.Render(w, r, ErrInvalidRequest(err))
@@ -113,7 +114,7 @@ func (rs *AccountResource) update(w http.ResponseWriter, r *http.Request) {
 }
 
 func (rs *AccountResource) delete(w http.ResponseWriter, r *http.Request) {
-	acc := r.Context().Value(ctxAccount).(*auth.Account)
+	acc := r.Context().Value(ctxAccount).(*pwdless.Account)
 	if err := rs.Store.Delete(acc); err != nil {
 		render.Render(w, r, ErrRender(err))
 		return
@@ -142,10 +143,10 @@ func (rs *AccountResource) updateToken(w http.ResponseWriter, r *http.Request) {
 		render.Render(w, r, ErrInvalidRequest(err))
 		return
 	}
-	acc := r.Context().Value(ctxAccount).(*auth.Account)
+	acc := r.Context().Value(ctxAccount).(*pwdless.Account)
 	for _, t := range acc.Token {
 		if t.ID == id {
-			if err := rs.Store.UpdateToken(&auth.Token{
+			if err := rs.Store.UpdateToken(&jwt.Token{
 				ID:         t.ID,
 				Identifier: data.Identifier,
 			}); err != nil {
@@ -163,10 +164,10 @@ func (rs *AccountResource) deleteToken(w http.ResponseWriter, r *http.Request) {
 		render.Render(w, r, ErrBadRequest)
 		return
 	}
-	acc := r.Context().Value(ctxAccount).(*auth.Account)
+	acc := r.Context().Value(ctxAccount).(*pwdless.Account)
 	for _, t := range acc.Token {
 		if t.ID == id {
-			rs.Store.DeleteToken(&auth.Token{ID: t.ID})
+			rs.Store.DeleteToken(&jwt.Token{ID: t.ID})
 		}
 	}
 	render.Respond(w, r, http.NoBody)

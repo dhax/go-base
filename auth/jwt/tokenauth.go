@@ -1,6 +1,7 @@
-package auth
+package jwt
 
 import (
+	"crypto/rand"
 	"net/http"
 	"time"
 
@@ -8,18 +9,11 @@ import (
 	"github.com/spf13/viper"
 )
 
-// AppClaims represent the claims extracted from JWT token.
-type AppClaims struct {
-	ID    int
-	Sub   string
-	Roles []string
-}
-
 // TokenAuth implements JWT authentication flow.
 type TokenAuth struct {
 	JwtAuth          *jwtauth.JwtAuth
-	jwtExpiry        time.Duration
-	jwtRefreshExpiry time.Duration
+	JwtExpiry        time.Duration
+	JwtRefreshExpiry time.Duration
 }
 
 // NewTokenAuth configures and returns a JWT authentication instance.
@@ -31,8 +25,8 @@ func NewTokenAuth() (*TokenAuth, error) {
 
 	a := &TokenAuth{
 		JwtAuth:          jwtauth.New("HS256", []byte(secret), nil),
-		jwtExpiry:        viper.GetDuration("auth_jwt_expiry"),
-		jwtRefreshExpiry: viper.GetDuration("auth_jwt_refresh_expiry"),
+		JwtExpiry:        viper.GetDuration("auth_jwt_expiry"),
+		JwtRefreshExpiry: viper.GetDuration("auth_jwt_refresh_expiry"),
 	}
 
 	return a, nil
@@ -59,7 +53,7 @@ func (a *TokenAuth) GenTokenPair(ca jwtauth.Claims, cr jwtauth.Claims) (string, 
 // CreateJWT returns an access token for provided account claims.
 func (a *TokenAuth) CreateJWT(c jwtauth.Claims) (string, error) {
 	c.SetIssuedNow()
-	c.SetExpiryIn(a.jwtExpiry)
+	c.SetExpiryIn(a.JwtExpiry)
 	_, tokenString, err := a.JwtAuth.Encode(c)
 	return tokenString, err
 }
@@ -67,46 +61,21 @@ func (a *TokenAuth) CreateJWT(c jwtauth.Claims) (string, error) {
 // CreateRefreshJWT returns a refresh token for provided token Claims.
 func (a *TokenAuth) CreateRefreshJWT(c jwtauth.Claims) (string, error) {
 	c.SetIssuedNow()
-	c.SetExpiryIn(a.jwtRefreshExpiry)
+	c.SetExpiryIn(a.JwtRefreshExpiry)
 	_, tokenString, err := a.JwtAuth.Encode(c)
 	return tokenString, err
 }
 
-func parseClaims(c jwtauth.Claims) (AppClaims, bool) {
-	var claims AppClaims
-	allOK := true
-	id, ok := c.Get("id")
-	if !ok {
-		allOK = false
-	}
-	claims.ID = int(id.(float64))
+const letterBytes = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 
-	sub, ok := c.Get("sub")
-	if !ok {
-		allOK = false
-	}
-	claims.Sub = sub.(string)
-
-	rl, ok := c.Get("roles")
-	if !ok {
-		allOK = false
+func randStringBytes(n int) string {
+	buf := make([]byte, n)
+	if _, err := rand.Read(buf); err != nil {
+		panic(err)
 	}
 
-	var roles []string
-	if rl != nil {
-		for _, v := range rl.([]interface{}) {
-			roles = append(roles, v.(string))
-		}
+	for k, v := range buf {
+		buf[k] = letterBytes[v%byte(len(letterBytes))]
 	}
-	claims.Roles = roles
-
-	return claims, allOK
-}
-
-func parseRefreshClaims(c jwtauth.Claims) (string, bool) {
-	token, ok := c.Get("token")
-	if !ok {
-		return "", false
-	}
-	return token.(string), ok
+	return string(buf)
 }

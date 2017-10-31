@@ -1,29 +1,93 @@
-package auth
+// Package pwdless provides JSON Web Token (JWT) authentication and authorization middleware.
+// It implements a passwordless authentication flow by sending login tokens vie email which are then exchanged for JWT access and refresh tokens.
+package pwdless
 
 import (
-	"errors"
 	"fmt"
 	"net/http"
 	"path"
 	"strings"
 	"time"
 
+	"github.com/dhax/go-base/auth/jwt"
+	"github.com/dhax/go-base/email"
+	"github.com/dhax/go-base/logging"
+	"github.com/go-chi/chi"
 	"github.com/go-chi/render"
 	validation "github.com/go-ozzo/ozzo-validation"
 	"github.com/go-ozzo/ozzo-validation/is"
 	"github.com/mssola/user_agent"
 	uuid "github.com/satori/go.uuid"
-
-	"github.com/dhax/go-base/email"
+	"github.com/sirupsen/logrus"
 )
 
-// The list of error types presented to the end user as error message.
-var (
-	ErrInvalidLogin  = errors.New("invalid email address")
-	ErrUnknownLogin  = errors.New("email not registered")
-	ErrLoginDisabled = errors.New("login for account disabled")
-	ErrLoginToken    = errors.New("invalid or expired login token")
-)
+// AuthStorer defines database operations on accounts and tokens.
+type AuthStorer interface {
+	GetAccount(id int) (*Account, error)
+	GetAccountByEmail(email string) (*Account, error)
+	UpdateAccount(a *Account) error
+
+	GetToken(token string) (*jwt.Token, error)
+	CreateOrUpdateToken(t *jwt.Token) error
+	DeleteToken(t *jwt.Token) error
+	PurgeExpiredToken() error
+}
+
+// Mailer defines methods to send account emails.
+type Mailer interface {
+	LoginToken(name, email string, c email.ContentLoginToken) error
+}
+
+// Resource implements passwordless account authentication against a database.
+type Resource struct {
+	LoginAuth *LoginTokenAuth
+	TokenAuth *jwt.TokenAuth
+	Store     AuthStorer
+	Mailer    Mailer
+}
+
+// NewResource returns a configured authentication resource.
+func NewResource(authStore AuthStorer, mailer Mailer) (*Resource, error) {
+	loginAuth, err := NewLoginTokenAuth()
+	if err != nil {
+		return nil, err
+	}
+
+	tokenAuth, err := jwt.NewTokenAuth()
+	if err != nil {
+		return nil, err
+	}
+
+	resource := &Resource{
+		LoginAuth: loginAuth,
+		TokenAuth: tokenAuth,
+		Store:     authStore,
+		Mailer:    mailer,
+	}
+
+	resource.choresTicker()
+
+	return resource, nil
+}
+
+// Router provides necessary routes for passwordless authentication flow.
+func (rs *Resource) Router() *chi.Mux {
+	r := chi.NewRouter()
+	r.Use(render.SetContentType(render.ContentTypeJSON))
+	r.Post("/login", rs.login)
+	r.Post("/token", rs.token)
+	r.Group(func(r chi.Router) {
+		r.Use(rs.TokenAuth.Verifier())
+		r.Use(jwt.AuthenticateRefreshJWT)
+		r.Post("/refresh", rs.refresh)
+		r.Post("/logout", rs.logout)
+	})
+	return r
+}
+
+func log(r *http.Request) logrus.FieldLogger {
+	return logging.GetLogEntry(r)
+}
 
 type loginRequest struct {
 	Email string
@@ -46,7 +110,7 @@ func (rs *Resource) login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	acc, err := rs.store.GetByEmail(body.Email)
+	acc, err := rs.Store.GetAccountByEmail(body.Email)
 	if err != nil {
 		log(r).WithField("email", body.Email).Warn(err)
 		render.Render(w, r, ErrUnauthorized(ErrUnknownLogin))
@@ -58,17 +122,17 @@ func (rs *Resource) login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	lt := rs.Login.CreateToken(acc.ID)
+	lt := rs.LoginAuth.CreateToken(acc.ID)
 
 	go func() {
 		content := email.ContentLoginToken{
 			Email:  acc.Email,
 			Name:   acc.Name,
-			URL:    path.Join(rs.Login.loginURL, lt.Token),
+			URL:    path.Join(rs.LoginAuth.loginURL, lt.Token),
 			Token:  lt.Token,
 			Expiry: lt.Expiry,
 		}
-		if err := rs.mailer.LoginToken(acc.Name, acc.Email, content); err != nil {
+		if err := rs.Mailer.LoginToken(acc.Name, acc.Email, content); err != nil {
 			log(r).WithField("module", "email").Error(err)
 		}
 	}()
@@ -101,13 +165,13 @@ func (rs *Resource) token(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	id, err := rs.Login.GetAccountID(body.Token)
+	id, err := rs.LoginAuth.GetAccountID(body.Token)
 	if err != nil {
 		render.Render(w, r, ErrUnauthorized(ErrLoginToken))
 		return
 	}
 
-	acc, err := rs.store.GetByID(id)
+	acc, err := rs.Store.GetAccount(id)
 	if err != nil {
 		// account deleted before login token expired
 		render.Render(w, r, ErrUnauthorized(ErrUnknownLogin))
@@ -122,22 +186,22 @@ func (rs *Resource) token(w http.ResponseWriter, r *http.Request) {
 	ua := user_agent.New(r.UserAgent())
 	browser, _ := ua.Browser()
 
-	token := &Token{
+	token := &jwt.Token{
 		Token:      uuid.NewV4().String(),
-		Expiry:     time.Now().Add(rs.Token.jwtRefreshExpiry),
+		Expiry:     time.Now().Add(rs.TokenAuth.JwtRefreshExpiry),
 		UpdatedAt:  time.Now(),
 		AccountID:  acc.ID,
 		Mobile:     ua.Mobile(),
 		Identifier: fmt.Sprintf("%s on %s", browser, ua.OS()),
 	}
 
-	if err := rs.store.SaveRefreshToken(token); err != nil {
+	if err := rs.Store.CreateOrUpdateToken(token); err != nil {
 		log(r).Error(err)
 		render.Render(w, r, ErrInternalServerError)
 		return
 	}
 
-	access, refresh, err := rs.Token.GenTokenPair(acc.Claims(), token.Claims())
+	access, refresh, err := rs.TokenAuth.GenTokenPair(acc.Claims(), token.Claims())
 	if err != nil {
 		log(r).Error(err)
 		render.Render(w, r, ErrInternalServerError)
@@ -145,7 +209,7 @@ func (rs *Resource) token(w http.ResponseWriter, r *http.Request) {
 	}
 
 	acc.LastLogin = time.Now()
-	if err := rs.store.UpdateAccount(acc); err != nil {
+	if err := rs.Store.UpdateAccount(acc); err != nil {
 		log(r).Error(err)
 		render.Render(w, r, ErrInternalServerError)
 		return
@@ -158,17 +222,23 @@ func (rs *Resource) token(w http.ResponseWriter, r *http.Request) {
 }
 
 func (rs *Resource) refresh(w http.ResponseWriter, r *http.Request) {
-	rt := RefreshTokenFromCtx(r.Context())
+	rt := jwt.RefreshTokenFromCtx(r.Context())
 
-	acc, token, err := rs.store.GetByRefreshToken(rt)
+	token, err := rs.Store.GetToken(rt)
 	if err != nil {
-		render.Render(w, r, ErrUnauthorized(errTokenExpired))
+		render.Render(w, r, ErrUnauthorized(jwt.ErrTokenExpired))
 		return
 	}
 
 	if time.Now().After(token.Expiry) {
-		rs.store.DeleteRefreshToken(token)
-		render.Render(w, r, ErrUnauthorized(errTokenExpired))
+		rs.Store.DeleteToken(token)
+		render.Render(w, r, ErrUnauthorized(jwt.ErrTokenExpired))
+		return
+	}
+
+	acc, err := rs.Store.GetAccount(token.AccountID)
+	if err != nil {
+		render.Render(w, r, ErrUnauthorized(ErrUnknownLogin))
 		return
 	}
 
@@ -178,24 +248,24 @@ func (rs *Resource) refresh(w http.ResponseWriter, r *http.Request) {
 	}
 
 	token.Token = uuid.NewV4().String()
-	token.Expiry = time.Now().Add(rs.Token.jwtRefreshExpiry)
+	token.Expiry = time.Now().Add(rs.TokenAuth.JwtRefreshExpiry)
 	token.UpdatedAt = time.Now()
 
-	access, refresh, err := rs.Token.GenTokenPair(acc.Claims(), token.Claims())
+	access, refresh, err := rs.TokenAuth.GenTokenPair(acc.Claims(), token.Claims())
 	if err != nil {
 		log(r).Error(err)
 		render.Render(w, r, ErrInternalServerError)
 		return
 	}
 
-	if err := rs.store.SaveRefreshToken(token); err != nil {
+	if err := rs.Store.CreateOrUpdateToken(token); err != nil {
 		log(r).Error(err)
 		render.Render(w, r, ErrInternalServerError)
 		return
 	}
 
 	acc.LastLogin = time.Now()
-	if err := rs.store.UpdateAccount(acc); err != nil {
+	if err := rs.Store.UpdateAccount(acc); err != nil {
 		log(r).Error(err)
 		render.Render(w, r, ErrInternalServerError)
 		return
@@ -208,13 +278,13 @@ func (rs *Resource) refresh(w http.ResponseWriter, r *http.Request) {
 }
 
 func (rs *Resource) logout(w http.ResponseWriter, r *http.Request) {
-	rt := RefreshTokenFromCtx(r.Context())
-	_, token, err := rs.store.GetByRefreshToken(rt)
+	rt := jwt.RefreshTokenFromCtx(r.Context())
+	token, err := rs.Store.GetToken(rt)
 	if err != nil {
-		render.Render(w, r, ErrUnauthorized(errTokenExpired))
+		render.Render(w, r, ErrUnauthorized(jwt.ErrTokenExpired))
 		return
 	}
-	rs.store.DeleteRefreshToken(token)
+	rs.Store.DeleteToken(token)
 
 	render.Respond(w, r, http.NoBody)
 }

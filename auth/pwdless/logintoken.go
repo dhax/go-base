@@ -1,6 +1,7 @@
-package auth
+package pwdless
 
 import (
+	"crypto/rand"
 	"errors"
 	"sync"
 	"time"
@@ -86,4 +87,18 @@ func (a *LoginTokenAuth) purgeExpired() {
 			a.delete(t)
 		}
 	}
+}
+
+const letterBytes = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+
+func randStringBytes(n int) string {
+	buf := make([]byte, n)
+	if _, err := rand.Read(buf); err != nil {
+		panic(err)
+	}
+
+	for k, v := range buf {
+		buf[k] = letterBytes[v%byte(len(letterBytes))]
+	}
+	return string(buf)
 }

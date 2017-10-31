@@ -4,7 +4,7 @@ import (
 	"context"
 	"net/http"
 
-	"github.com/dhax/go-base/auth"
+	"github.com/dhax/go-base/auth/jwt"
 	"github.com/dhax/go-base/models"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/render"
@@ -39,7 +39,7 @@ func (rs *ProfileResource) router() *chi.Mux {
 
 func (rs *ProfileResource) profileCtx(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		claims := auth.ClaimsFromCtx(r.Context())
+		claims := jwt.ClaimsFromCtx(r.Context())
 		p, err := rs.Store.Get(claims.ID)
 		if err != nil {
 			log(r).WithField("profileCtx", claims.Sub).Error(err)

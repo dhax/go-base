@@ -10,7 +10,8 @@ import (
 
 	"github.com/dhax/go-base/api/admin"
 	"github.com/dhax/go-base/api/app"
-	"github.com/dhax/go-base/auth"
+	"github.com/dhax/go-base/auth/jwt"
+	"github.com/dhax/go-base/auth/pwdless"
 	"github.com/dhax/go-base/database"
 	"github.com/dhax/go-base/email"
 	"github.com/dhax/go-base/logging"
@@ -37,7 +38,7 @@ func New() (*chi.Mux, error) {
 	}
 
 	authStore := database.NewAuthStore(db)
-	authResource, err := auth.NewResource(authStore, mailer)
+	authResource, err := pwdless.NewResource(authStore, mailer)
 	if err != nil {
 		logger.WithField("module", "auth").Error(err)
 		return nil, err
@@ -70,8 +71,8 @@ func New() (*chi.Mux, error) {
 
 	r.Mount("/auth", authResource.Router())
 	r.Group(func(r chi.Router) {
-		r.Use(authResource.Token.Verifier())
-		r.Use(auth.Authenticator)
+		r.Use(authResource.TokenAuth.Verifier())
+		r.Use(jwt.Authenticator)
 		r.Mount("/admin", adminAPI.Router())
 		r.Mount("/api", appAPI.Router())
 	})

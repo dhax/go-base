@@ -1,12 +1,13 @@
-package auth
+package jwt
 
 import (
 	"context"
-	"errors"
 	"net/http"
 
 	"github.com/go-chi/jwtauth"
 	"github.com/go-chi/render"
+
+	"github.com/dhax/go-base/logging"
 )
 
 type ctxKey int
@@ -14,13 +15,6 @@ type ctxKey int
 const (
 	ctxClaims ctxKey = iota
 	ctxRefreshToken
-)
-
-var (
-	errTokenUnauthorized   = errors.New("token unauthorized")
-	errTokenExpired        = errors.New("token expired")
-	errInvalidAccessToken  = errors.New("invalid access token")
-	errInvalidRefreshToken = errors.New("invalid refresh token")
 )
 
 // ClaimsFromCtx retrieves the parsed AppClaims from request context.
@@ -41,23 +35,27 @@ func Authenticator(next http.Handler) http.Handler {
 		token, claims, err := jwtauth.FromContext(r.Context())
 
 		if err != nil {
-			log(r).Warn(err)
-			render.Render(w, r, ErrUnauthorized(errTokenUnauthorized))
+			logging.GetLogEntry(r).Warn(err)
+			render.Render(w, r, ErrUnauthorized(ErrTokenUnauthorized))
 			return
 		}
 
 		if !token.Valid {
-			render.Render(w, r, ErrUnauthorized(errTokenExpired))
+			render.Render(w, r, ErrUnauthorized(ErrTokenExpired))
 			return
 		}
 
 		// Token is authenticated, parse claims
-		pc, ok := parseClaims(claims)
-		if !ok {
-			render.Render(w, r, ErrUnauthorized(errInvalidAccessToken))
+		var c AppClaims
+		err = c.ParseClaims(claims)
+		if err != nil {
+			logging.GetLogEntry(r).Error(err)
+			render.Render(w, r, ErrUnauthorized(ErrInvalidAccessToken))
 			return
 		}
-		ctx := context.WithValue(r.Context(), ctxClaims, pc)
+
+		// Set AppClaims on context
+		ctx := context.WithValue(r.Context(), ctxClaims, c)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
@@ -67,21 +65,25 @@ func AuthenticateRefreshJWT(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		token, claims, err := jwtauth.FromContext(r.Context())
 		if err != nil {
-			log(r).Warn(err)
-			render.Render(w, r, ErrUnauthorized(errTokenUnauthorized))
+			logging.GetLogEntry(r).Warn(err)
+			render.Render(w, r, ErrUnauthorized(ErrTokenUnauthorized))
 			return
 		}
 		if !token.Valid {
-			render.Render(w, r, ErrUnauthorized(errTokenExpired))
+			render.Render(w, r, ErrUnauthorized(ErrTokenExpired))
 			return
 		}
-		refreshToken, ok := parseRefreshClaims(claims)
-		if !ok {
-			render.Render(w, r, ErrUnauthorized(errInvalidRefreshToken))
+
+		// Token is authenticated, parse refresh token string
+		var c RefreshClaims
+		err = c.ParseClaims(claims)
+		if err != nil {
+			logging.GetLogEntry(r).Error(err)
+			render.Render(w, r, ErrUnauthorized(ErrInvalidRefreshToken))
 			return
 		}
-		// Token is authenticated, set on context
-		ctx := context.WithValue(r.Context(), ctxRefreshToken, refreshToken)
+		// Set refresh token string on context
+		ctx := context.WithValue(r.Context(), ctxRefreshToken, c.Token)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }

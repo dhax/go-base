@@ -1,7 +1,8 @@
 package database
 
 import (
-	"github.com/dhax/go-base/auth"
+	"github.com/dhax/go-base/auth/jwt"
+	"github.com/dhax/go-base/auth/pwdless"
 	"github.com/dhax/go-base/models"
 	"github.com/go-pg/pg"
 )
@@ -19,8 +20,8 @@ func NewAccountStore(db *pg.DB) *AccountStore {
 }
 
 // Get an account by ID.
-func (s *AccountStore) Get(id int) (*auth.Account, error) {
-	a := auth.Account{ID: id}
+func (s *AccountStore) Get(id int) (*pwdless.Account, error) {
+	a := pwdless.Account{ID: id}
 	err := s.db.Model(&a).
 		Where("account.id = ?id").
 		Column("account.*", "Token").
@@ -29,7 +30,7 @@ func (s *AccountStore) Get(id int) (*auth.Account, error) {
 }
 
 // Update an account.
-func (s *AccountStore) Update(a *auth.Account) error {
+func (s *AccountStore) Update(a *pwdless.Account) error {
 	_, err := s.db.Model(a).
 		Column("email", "name").
 		Update()
@@ -37,9 +38,9 @@ func (s *AccountStore) Update(a *auth.Account) error {
 }
 
 // Delete an account.
-func (s *AccountStore) Delete(a *auth.Account) error {
+func (s *AccountStore) Delete(a *pwdless.Account) error {
 	err := s.db.RunInTransaction(func(tx *pg.Tx) error {
-		if _, err := tx.Model(&auth.Token{}).
+		if _, err := tx.Model(&jwt.Token{}).
 			Where("account_id = ?", a.ID).
 			Delete(); err != nil {
 			return err
@@ -55,7 +56,7 @@ func (s *AccountStore) Delete(a *auth.Account) error {
 }
 
 // UpdateToken updates a jwt refresh token.
-func (s *AccountStore) UpdateToken(t *auth.Token) error {
+func (s *AccountStore) UpdateToken(t *jwt.Token) error {
 	_, err := s.db.Model(t).
 		Column("identifier").
 		Update()
@@ -63,7 +64,7 @@ func (s *AccountStore) UpdateToken(t *auth.Token) error {
 }
 
 // DeleteToken deletes a jwt refresh token.
-func (s *AccountStore) DeleteToken(t *auth.Token) error {
+func (s *AccountStore) DeleteToken(t *jwt.Token) error {
 	err := s.db.Delete(t)
 	return err
 }

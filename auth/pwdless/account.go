@@ -1,10 +1,11 @@
-package auth
+package pwdless
 
 import (
 	"net/url"
 	"strings"
 	"time"
 
+	"github.com/dhax/go-base/auth/jwt"
 	"github.com/go-chi/jwtauth"
 	validation "github.com/go-ozzo/ozzo-validation"
 	"github.com/go-ozzo/ozzo-validation/is"
@@ -23,7 +24,7 @@ type Account struct {
 	Active bool     `sql:",notnull" json:"active"`
 	Roles  []string `pg:",array" json:"roles,omitempty"`
 
-	Token []Token `json:"token,omitempty"`
+	Token []jwt.Token `json:"token,omitempty"`
 }
 
 // BeforeInsert hook executed before database insert operation.
@@ -38,11 +39,8 @@ func (a *Account) BeforeInsert(db orm.DB) error {
 
 // BeforeUpdate hook executed before database update operation.
 func (a *Account) BeforeUpdate(db orm.DB) error {
-	if err := a.Validate(); err != nil {
-		return err
-	}
 	a.UpdatedAt = time.Now()
-	return nil
+	return a.Validate()
 }
 
 // BeforeDelete hook executed before database delete operation.

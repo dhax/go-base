@@ -82,10 +82,7 @@ func (m *Mailer) Send(mail *message) error {
 	msg.SetBody("text/plain", mail.text)
 	msg.AddAlternative("text/html", mail.html)
 
-	if err := m.client.DialAndSend(msg); err != nil {
-		return err
-	}
-	return nil
+	return m.client.DialAndSend(msg)
 }
 
 // message struct holds all parts of a specific email message.

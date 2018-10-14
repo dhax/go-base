@@ -1,6 +1,6 @@
 .DS_STORE
 .vscode
-.realize
+.realize.yaml
 
 debug
 go-base

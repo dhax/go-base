@@ -44,6 +44,7 @@ func (s *AuthStore) GetAccountByEmail(e string) (*pwdless.Account, error) {
 func (s *AuthStore) UpdateAccount(a *pwdless.Account) error {
 	_, err := s.db.Model(a).
 		Column("last_login").
+		WherePK().
 		Update()
 	return err
 }

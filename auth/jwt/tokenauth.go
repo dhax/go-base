@@ -11,7 +11,7 @@ import (
 
 // TokenAuth implements JWT authentication flow.
 type TokenAuth struct {
-	JwtAuth          *jwtauth.JwtAuth
+	JwtAuth          *jwtauth.JWTAuth
 	JwtExpiry        time.Duration
 	JwtRefreshExpiry time.Duration
 }

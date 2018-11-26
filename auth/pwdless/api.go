@@ -187,7 +187,7 @@ func (rs *Resource) token(w http.ResponseWriter, r *http.Request) {
 	browser, _ := ua.Browser()
 
 	token := &jwt.Token{
-		Token:      uuid.NewV4().String(),
+		Token:      uuid.Must(uuid.NewV4()).String(),
 		Expiry:     time.Now().Add(rs.TokenAuth.JwtRefreshExpiry),
 		UpdatedAt:  time.Now(),
 		AccountID:  acc.ID,
@@ -247,7 +247,7 @@ func (rs *Resource) refresh(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	token.Token = uuid.NewV4().String()
+	token.Token = uuid.Must(uuid.NewV4()).String()
 	token.Expiry = time.Now().Add(rs.TokenAuth.JwtRefreshExpiry)
 	token.UpdatedAt = time.Now()
 

@@ -3,7 +3,7 @@ package jwt
 import (
 	"errors"
 
-	"github.com/go-chi/jwtauth"
+	"github.com/dgrijalva/jwt-go"
 )
 
 // AppClaims represent the claims parsed from JWT access token.
@@ -14,20 +14,20 @@ type AppClaims struct {
 }
 
 // ParseClaims parses JWT claims into AppClaims.
-func (c *AppClaims) ParseClaims(claims jwtauth.Claims) error {
-	id, ok := claims.Get("id")
+func (c *AppClaims) ParseClaims(claims jwt.MapClaims) error {
+	id, ok := claims["id"]
 	if !ok {
 		return errors.New("could not parse claim id")
 	}
 	c.ID = int(id.(float64))
 
-	sub, ok := claims.Get("sub")
+	sub, ok := claims["sub"]
 	if !ok {
 		return errors.New("could not parse claim sub")
 	}
 	c.Sub = sub.(string)
 
-	rl, ok := claims.Get("roles")
+	rl, ok := claims["roles"]
 	if !ok {
 		return errors.New("could not parse claims roles")
 	}
@@ -49,8 +49,8 @@ type RefreshClaims struct {
 }
 
 // ParseClaims parses the JWT claims into RefreshClaims.
-func (c *RefreshClaims) ParseClaims(claims jwtauth.Claims) error {
-	token, ok := claims.Get("token")
+func (c *RefreshClaims) ParseClaims(claims jwt.MapClaims) error {
+	token, ok := claims["token"]
 	if !ok {
 		return errors.New("could not parse claim token")
 	}

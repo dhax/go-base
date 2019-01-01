@@ -2,11 +2,13 @@ package database
 
 import (
 	"errors"
+	"net/url"
 
 	"github.com/dhax/go-base/auth/jwt"
 	"github.com/dhax/go-base/auth/pwdless"
 	"github.com/dhax/go-base/models"
 	"github.com/go-pg/pg"
+	"github.com/go-pg/pg/orm"
 )
 
 var (
@@ -26,8 +28,32 @@ func NewAdmAccountStore(db *pg.DB) *AdmAccountStore {
 	}
 }
 
+// AccountFilter provides pagination and filtering options on accounts.
+type AccountFilter struct {
+	orm.Pager
+	Filters url.Values
+	Order   []string
+}
+
+// Filter applies an AccountFilter on an orm.Query.
+func (f *AccountFilter) Filter(q *orm.Query) (*orm.Query, error) {
+	q = q.Apply(f.Pager.Paginate)
+	q = q.Apply(orm.URLFilters(f.Filters))
+	q = q.Order(f.Order...)
+	return q, nil
+}
+
+// NewAccountFilter returns an AccountFilter with options parsed from request url values.
+func NewAccountFilter(v url.Values) AccountFilter {
+	var f AccountFilter
+	f.SetURLValues(v)
+	f.Filters = v
+	f.Order = v["order"]
+	return f
+}
+
 // List applies a filter and returns paginated array of matching results and total count.
-func (s *AdmAccountStore) List(f pwdless.AccountFilter) ([]pwdless.Account, int, error) {
+func (s *AdmAccountStore) List(f AccountFilter) ([]pwdless.Account, int, error) {
 	a := []pwdless.Account{}
 	count, err := s.db.Model(&a).
 		Apply(f.Filter).

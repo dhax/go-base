@@ -44,9 +44,9 @@ Besides /auth/* the API provides to main routes /api/* and /admin/* to distingui
 Check [routes.md](routes.md) file for an overview of the provided API routes.
 
 #### Demo client application
-For demonstration of the login and account management features this API also serves a Single Page Application (SPA) as a Progressive Web App (PWA) done with [Quasar Framework](http://quasar-framework.org) which itself is powered by [Vue.js](https://vuejs.org). The client's source code can be found [here](https://github.com/dhax/go-base-client).
+For demonstration of the login and account management features this API also serves a [Vue.js](https://vuejs.org) Progressive Web App (PWA). The client's source code can be found [here](https://github.com/dhax/go-base-vue).
 
-If no valid email smtp settings are provided by environment variables, emails will be print to stdout showing the login token. Use one of the following users for login:
+If no valid email smtp settings are provided by environment variables, emails will be print to stdout showing the login token. Use one of the following bootstrapped users for login:
 - admin@boot.io (has access to admin panel)
 - user@boot.io
 

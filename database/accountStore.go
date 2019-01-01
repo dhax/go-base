@@ -33,6 +33,7 @@ func (s *AccountStore) Get(id int) (*pwdless.Account, error) {
 func (s *AccountStore) Update(a *pwdless.Account) error {
 	_, err := s.db.Model(a).
 		Column("email", "name").
+		WherePK().
 		Update()
 	return err
 }
@@ -59,6 +60,7 @@ func (s *AccountStore) Delete(a *pwdless.Account) error {
 func (s *AccountStore) UpdateToken(t *jwt.Token) error {
 	_, err := s.db.Model(t).
 		Column("identifier").
+		WherePK().
 		Update()
 	return err
 }

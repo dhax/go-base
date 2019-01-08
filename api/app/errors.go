@@ -1,10 +1,10 @@
 package app
 
 import (
-	"encoding/json"
 	"net/http"
 
 	"github.com/go-chi/render"
+	validation "github.com/go-ozzo/ozzo-validation"
 )
 
 // ErrResponse renderer type for handling all sorts of errors.
@@ -12,9 +12,10 @@ type ErrResponse struct {
 	Err            error `json:"-"` // low-level runtime error
 	HTTPStatusCode int   `json:"-"` // http response status code
 
-	StatusText string `json:"status"`          // user-level status message
-	AppCode    int64  `json:"code,omitempty"`  // application-specific error code
-	ErrorText  string `json:"error,omitempty"` // application-level error message, for debugging
+	StatusText       string            `json:"status"`           // user-level status message
+	AppCode          int64             `json:"code,omitempty"`   // application-specific error code
+	ErrorText        string            `json:"error,omitempty"`  // application-level error message, for debugging
+	ValidationErrors validation.Errors `json:"errors,omitempty"` // user level model validation errors
 }
 
 // Render sets the application-specific error code in AppCode.
@@ -33,29 +34,14 @@ func ErrInvalidRequest(err error) render.Renderer {
 	}
 }
 
-// ErrValidationResponse renderer for handling validation errors.
-type ErrValidationResponse struct {
-	*ErrResponse
-	Errors string `json:"errors,omitempty"`
-}
-
-// Render sets the application-specific error code in AppCode.
-func (ev *ErrValidationResponse) Render(w http.ResponseWriter, r *http.Request) error {
-	render.Status(r, ev.ErrResponse.HTTPStatusCode)
-	return nil
-}
-
 // ErrValidation returns status 422 Unprocessable Entity stating validation errors.
-func ErrValidation(valErrors error) render.Renderer {
-	b, _ := json.Marshal(valErrors)
-	return &ErrValidationResponse{
-		&ErrResponse{
-			Err:            nil,
-			HTTPStatusCode: http.StatusUnprocessableEntity,
-			StatusText:     http.StatusText(http.StatusUnprocessableEntity),
-			ErrorText:      "object validation error",
-		},
-		string(b),
+func ErrValidation(err error, valErr validation.Errors) render.Renderer {
+	return &ErrResponse{
+		Err:              err,
+		HTTPStatusCode:   http.StatusUnprocessableEntity,
+		StatusText:       http.StatusText(http.StatusUnprocessableEntity),
+		ErrorText:        err.Error(),
+		ValidationErrors: valErr,
 	}
 }
 

@@ -2,6 +2,7 @@ package app
 
 import (
 	"context"
+	"errors"
 	"net/http"
 	"strconv"
 	"strings"
@@ -12,6 +13,11 @@ import (
 
 	"github.com/dhax/go-base/auth/jwt"
 	"github.com/dhax/go-base/auth/pwdless"
+)
+
+// The list of error types returned from account resource.
+var (
+	ErrAccountValidation = errors.New("account validation error")
 )
 
 // AccountStore defines database operations for account.
@@ -103,7 +109,7 @@ func (rs *AccountResource) update(w http.ResponseWriter, r *http.Request) {
 	if err := rs.Store.Update(acc); err != nil {
 		switch err.(type) {
 		case validation.Errors:
-			render.Render(w, r, ErrValidation(err))
+			render.Render(w, r, ErrValidation(ErrAccountValidation, err.(validation.Errors)))
 			return
 		}
 		render.Render(w, r, ErrRender(err))

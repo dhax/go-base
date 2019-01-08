@@ -2,6 +2,7 @@ package app
 
 import (
 	"context"
+	"errors"
 	"net/http"
 
 	"github.com/dhax/go-base/auth/jwt"
@@ -9,6 +10,11 @@ import (
 	"github.com/go-chi/chi"
 	"github.com/go-chi/render"
 	validation "github.com/go-ozzo/ozzo-validation"
+)
+
+// The list of error types returned from account resource.
+var (
+	ErrProfileValidation = errors.New("profile validation error")
 )
 
 // ProfileStore defines database operations for a profile.
@@ -85,7 +91,7 @@ func (rs *ProfileResource) update(w http.ResponseWriter, r *http.Request) {
 	if err := rs.Store.Update(p); err != nil {
 		switch err.(type) {
 		case validation.Errors:
-			render.Render(w, r, ErrValidation(err))
+			render.Render(w, r, ErrValidation(ErrProfileValidation, err.(validation.Errors)))
 			return
 		}
 		render.Render(w, r, ErrRender(err))

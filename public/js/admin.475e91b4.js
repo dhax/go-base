@@ -1,2 +1,0 @@
-(window["webpackJsonp"]=window["webpackJsonp"]||[]).push([["admin"],{"0156":function(n,e,t){"use strict";var i=t("1366"),a=t.n(i);a.a},1366:function(n,e,t){},3530:function(n,e,t){"use strict";t.r(e);var i=function(){var n=this,e=n.$createElement,t=n._self._c||e;return t("v-container",[t("router-view")],1)},a=[],c=(t("cadf"),t("551c"),t("097d"),{}),o=c,r=(t("0156"),t("2877")),u=t("6544"),s=t.n(u),l=t("a523"),f=Object(r["a"])(o,i,a,!1,null,null,null);f.options.__file="Admin.vue";e["default"]=f.exports;s()(f,{VContainer:l["a"]})}}]);
-//# sourceMappingURL=admin.475e91b4.js.map

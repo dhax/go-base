@@ -11,7 +11,6 @@ The following feature set is a minimal selection of typical Web API requirements
 
 - Configuration using [viper](https://github.com/spf13/viper)
 - CLI features using [cobra](https://github.com/spf13/cobra)
-- [dep](https://github.com/golang/dep) for dependency management
 - PostgreSQL support including migrations using [go-pg](https://github.com/go-pg/pg)
 - Structured logging with [Logrus](https://github.com/sirupsen/logrus)
 - Routing with [chi router](https://github.com/go-chi/chi) and middleware
@@ -22,10 +21,8 @@ The following feature set is a minimal selection of typical Web API requirements
 ### Start Application
 - Clone this repository
 - Create a postgres database and set environment variable *DATABASE_URL* accordingly if not using same as default
-- Build the application: ```go build``` to create ```go-base``` binary or use ```go run main.go``` instead in the following commands
-- Run ```go-base``` for cobra generated help message.
-- Initialize the database migrations table: ```go-base migrate init```
-- Run all migrations found in ./database/migrate with: ```go-base migrate```
+- Build the application: ```go build``` to create ```go-base``` binary
+- Initialize the database and run all migrations found in ./database/migrate with: ```go-base migrate```
 - Run the application: ```go-base serve```
 
 ### API Routes

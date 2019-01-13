@@ -62,6 +62,9 @@ var (
 	// ErrUnauthorized returns 401 Unauthorized.
 	ErrUnauthorized = &ErrResponse{HTTPStatusCode: http.StatusUnauthorized, StatusText: http.StatusText(http.StatusUnauthorized)}
 
+	// ErrForbidden returns status 403 Forbidden for unauthorized request.
+	ErrForbidden = &ErrResponse{HTTPStatusCode: http.StatusForbidden, StatusText: http.StatusText(http.StatusForbidden)}
+
 	// ErrNotFound returns status 404 Not Found for invalid resource request.
 	ErrNotFound = &ErrResponse{HTTPStatusCode: http.StatusNotFound, StatusText: http.StatusText(http.StatusNotFound)}
 

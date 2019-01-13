@@ -3,7 +3,6 @@ package database
 
 import (
 	"log"
-	"time"
 
 	"github.com/spf13/viper"
 
@@ -24,22 +23,26 @@ func DBConn() (*pg.DB, error) {
 	}
 
 	if viper.GetBool("db_debug") {
-		db.OnQueryProcessed(func(event *pg.QueryProcessedEvent) {
-			query, err := event.FormattedQuery()
-			if err != nil {
-				panic(err)
-			}
-			log.Printf("%s %s\n", time.Since(event.StartTime), query)
-		})
+		db.AddQueryHook(&logSQL{})
 	}
 
 	return db, nil
 }
 
+type logSQL struct{}
+
+func (l *logSQL) BeforeQuery(e *pg.QueryEvent) {}
+
+func (l *logSQL) AfterQuery(e *pg.QueryEvent) {
+	query, err := e.FormattedQuery()
+	if err != nil {
+		panic(err)
+	}
+	log.Println(query)
+}
+
 func checkConn(db *pg.DB) error {
 	var n int
-	if _, err := db.QueryOne(pg.Scan(&n), "SELECT 1"); err != nil {
-		return err
-	}
-	return nil
+	_, err := db.QueryOne(pg.Scan(&n), "SELECT 1")
+	return err
 }

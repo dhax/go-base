@@ -21,7 +21,7 @@ var (
 
 // AccountStore defines database operations for account management.
 type AccountStore interface {
-	List(f database.AccountFilter) ([]pwdless.Account, int, error)
+	List(*database.AccountFilter) ([]pwdless.Account, int, error)
 	Create(*pwdless.Account) error
 	Get(id int) (*pwdless.Account, error)
 	Update(*pwdless.Account) error
@@ -101,7 +101,11 @@ func newAccountListResponse(a []pwdless.Account, count int) *accountListResponse
 }
 
 func (rs *AccountResource) list(w http.ResponseWriter, r *http.Request) {
-	f := database.NewAccountFilter(r.URL.Query())
+	f, err := database.NewAccountFilter(r.URL.Query())
+	if err != nil {
+		render.Render(w, r, ErrRender(err))
+		return
+	}
 	al, count, err := rs.Store.List(f)
 	if err != nil {
 		render.Render(w, r, ErrRender(err))

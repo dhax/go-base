@@ -15,6 +15,8 @@ import (
 var (
 	// ErrUniqueEmailConstraint provides error message for already registered email address.
 	ErrUniqueEmailConstraint = errors.New("email already registered")
+	// ErrBadParams could not parse params to filter
+	ErrBadParams = errors.New("bad parameters")
 )
 
 // AdmAccountStore implements database operations for account management by admin.
@@ -38,7 +40,11 @@ type AccountFilter struct {
 
 // NewAccountFilter returns an AccountFilter with options parsed from request url values.
 func NewAccountFilter(params interface{}) (*AccountFilter, error) {
-	p := urlvalues.Values(params.(url.Values))
+	v, ok := params.(url.Values)
+	if !ok {
+		return nil, ErrBadParams
+	}
+	p := urlvalues.Values(v)
 	f := &AccountFilter{
 		Pager:  urlvalues.NewPager(p),
 		Filter: urlvalues.NewFilter(p),

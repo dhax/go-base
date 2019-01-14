@@ -12,10 +12,10 @@ import (
 	"strings"
 	"time"
 
+	"github.com/go-mail/mail"
 	"github.com/jaytaylor/html2text"
 	"github.com/spf13/viper"
 	"github.com/vanng822/go-premailer/premailer"
-	"gopkg.in/gomail.v2"
 )
 
 var (
@@ -25,7 +25,7 @@ var (
 
 // Mailer is a SMTP mailer.
 type Mailer struct {
-	client *gomail.Dialer
+	client *mail.Dialer
 	from   Email
 }
 
@@ -48,7 +48,7 @@ func NewMailer() (*Mailer, error) {
 	}
 
 	s := &Mailer{
-		client: gomail.NewPlainDialer(smtp.Host, smtp.Port, smtp.User, smtp.Password),
+		client: mail.NewPlainDialer(smtp.Host, smtp.Port, smtp.User, smtp.Password),
 		from:   NewEmail(viper.GetString("email_from_name"), viper.GetString("email_from_address")),
 	}
 
@@ -67,20 +67,20 @@ func NewMailer() (*Mailer, error) {
 }
 
 // Send sends the mail via smtp.
-func (m *Mailer) Send(mail *message) error {
+func (m *Mailer) Send(email *message) error {
 	if debug {
-		log.Println("To:", mail.to.Address)
-		log.Println("Subject:", mail.subject)
-		log.Println(mail.text)
+		log.Println("To:", email.to.Address)
+		log.Println("Subject:", email.subject)
+		log.Println(email.text)
 		return nil
 	}
 
-	msg := gomail.NewMessage()
-	msg.SetAddressHeader("From", mail.from.Address, mail.from.Name)
-	msg.SetAddressHeader("To", mail.to.Address, mail.to.Name)
-	msg.SetHeader("Subject", mail.subject)
-	msg.SetBody("text/plain", mail.text)
-	msg.AddAlternative("text/html", mail.html)
+	msg := mail.NewMessage()
+	msg.SetAddressHeader("From", email.from.Address, email.from.Name)
+	msg.SetAddressHeader("To", email.to.Address, email.to.Name)
+	msg.SetHeader("Subject", email.subject)
+	msg.SetBody("text/plain", email.text)
+	msg.AddAlternative("text/html", email.html)
 
 	return m.client.DialAndSend(msg)
 }

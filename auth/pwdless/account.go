@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/dhax/go-base/auth/jwt"
-	"github.com/go-chi/jwtauth"
+	jwtgo "github.com/dgrijalva/jwt-go"
 	validation "github.com/go-ozzo/ozzo-validation"
 	"github.com/go-ozzo/ozzo-validation/is"
 	"github.com/go-pg/pg/orm"
@@ -65,8 +65,8 @@ func (a *Account) CanLogin() bool {
 }
 
 // Claims returns the account's claims to be signed
-func (a *Account) Claims() jwtauth.Claims {
-	return jwtauth.Claims{
+func (a *Account) Claims() jwtgo.MapClaims {
+	return jwtgo.MapClaims{
 		"id":    a.ID,
 		"sub":   a.Name,
 		"roles": a.Roles,

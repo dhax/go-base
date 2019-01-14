@@ -26,6 +26,8 @@ github.com/go-chi/cors v1.0.0 h1:e6x8k7uWbUwYs+aXDoiUzeQFT6l0cygBYyNhD7/1Tg0=
 github.com/go-chi/cors v1.0.0/go.mod h1:K2Yje0VW/SJzxiyMYu6iPQYa7hMjQX2i/F491VChg1I=
 github.com/go-chi/docgen v1.0.2 h1:BL7Y/SQlZMlhEI8dgukaEvF0AqdqG7axNdJsUVAzbRE=
 github.com/go-chi/docgen v1.0.2/go.mod h1:n7Wqcp0XCeIb/IHrd6hxqtFJzCklt0pKeo7uVUXkrdY=
+github.com/go-chi/jwtauth v0.0.0-20190109153619-47840abb19b3 h1:cFmETtRzAus3IXaJbth19NdbGOrgjCP86WVK7E8xONM=
+github.com/go-chi/jwtauth v0.0.0-20190109153619-47840abb19b3/go.mod h1:ZdbLUuUBAgS2xbrMtdm0EXaHZ2uruR+RMdGn2bnlUtU=
 github.com/go-chi/jwtauth v3.3.0+incompatible h1:BEOEx6OueP61EfhuOTDqgroY0SYdcFsFsbY/n4f5+Kk=
 github.com/go-chi/jwtauth v3.3.0+incompatible/go.mod h1:Q5EIArY/QnD6BdS+IyDw7B2m6iNbnPxtfd6/BcmtWbs=
 github.com/go-chi/render v1.0.1 h1:4/5tis2cKaNdnv9zFLfXzcquC9HbeZgCnxGnKrltBS8=
@@ -38,6 +40,8 @@ github.com/go-pg/pg v6.15.0+incompatible h1:jwhQz62bkCc+VqBXyUTHzcESgACF6S9qsHAJ
 github.com/go-pg/pg v6.15.0+incompatible/go.mod h1:a2oXow+aFOrvwcKs3eIA0lNFmMilrxK2sOkB5NWe0vA=
 github.com/go-pg/pg v7.1.5+incompatible h1:FiXgxxswY4dfMMqrDFUCgqFt77hnCav8HHpPAvwZSxk=
 github.com/go-pg/pg v7.1.5+incompatible/go.mod h1:a2oXow+aFOrvwcKs3eIA0lNFmMilrxK2sOkB5NWe0vA=
+github.com/gofrs/uuid v3.2.0+incompatible h1:y12jRkkFxsd7GpqdSZ+/KCs/fJbqpEXSGd4+jfEaewE=
+github.com/gofrs/uuid v3.2.0+incompatible/go.mod h1:b2aQJv3Z4Fp6yNu3cdSllBxTCLRxnplIgP/c0N/04lM=
 github.com/golang/protobuf v1.2.0 h1:P3YflyNX/ehuJFLhxviNdFxQPkGK5cDcApsge1SqnvM=
 github.com/golang/protobuf v1.2.0/go.mod h1:6lQm79b+lXiMfvg/cZm0SGofjICqVBUtrP5yJMmIC1U=
 github.com/google/pprof v0.0.0-20190109223431-e84dfd68c163 h1:beB+Da4k9B1zmgag78k3k1Bx4L/fdWr5FwNa0f8RxmY=

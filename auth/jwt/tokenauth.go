@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"time"
 
+	jwt "github.com/dgrijalva/jwt-go"
 	"github.com/go-chi/jwtauth"
 	"github.com/spf13/viper"
 )
@@ -38,7 +39,7 @@ func (a *TokenAuth) Verifier() func(http.Handler) http.Handler {
 }
 
 // GenTokenPair returns both an access token and a refresh token.
-func (a *TokenAuth) GenTokenPair(ca jwtauth.Claims, cr jwtauth.Claims) (string, string, error) {
+func (a *TokenAuth) GenTokenPair(ca jwt.MapClaims, cr jwt.MapClaims) (string, string, error) {
 	access, err := a.CreateJWT(ca)
 	if err != nil {
 		return "", "", err
@@ -51,17 +52,17 @@ func (a *TokenAuth) GenTokenPair(ca jwtauth.Claims, cr jwtauth.Claims) (string, 
 }
 
 // CreateJWT returns an access token for provided account claims.
-func (a *TokenAuth) CreateJWT(c jwtauth.Claims) (string, error) {
-	c.SetIssuedNow()
-	c.SetExpiryIn(a.JwtExpiry)
+func (a *TokenAuth) CreateJWT(c jwt.MapClaims) (string, error) {
+	jwtauth.SetIssuedNow(c)
+	jwtauth.SetExpiryIn(c, a.JwtExpiry)
 	_, tokenString, err := a.JwtAuth.Encode(c)
 	return tokenString, err
 }
 
 // CreateRefreshJWT returns a refresh token for provided token Claims.
-func (a *TokenAuth) CreateRefreshJWT(c jwtauth.Claims) (string, error) {
-	c.SetIssuedNow()
-	c.SetExpiryIn(a.JwtRefreshExpiry)
+func (a *TokenAuth) CreateRefreshJWT(c jwt.MapClaims) (string, error) {
+	jwtauth.SetIssuedNow(c)
+	jwtauth.SetExpiryIn(c, a.JwtRefreshExpiry)
 	_, tokenString, err := a.JwtAuth.Encode(c)
 	return tokenString, err
 }

@@ -14,8 +14,8 @@ import (
 	"testing"
 	"time"
 
+	jwtgo "github.com/dgrijalva/jwt-go"
 	"github.com/go-chi/chi"
-	"github.com/go-chi/jwtauth"
 	"github.com/spf13/viper"
 
 	"github.com/dhax/go-base/auth/jwt"
@@ -240,7 +240,7 @@ func TestAuthResource_refresh(t *testing.T) {
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			jwt := genJWT(jwtauth.Claims{"token": tc.token, "exp": time.Minute * tc.exp})
+			jwt := genJWT(jwtgo.MapClaims{"token": tc.token, "exp": time.Minute * tc.exp})
 			res, body := testRequest(t, ts, "POST", "/refresh", nil, jwt)
 			if res.StatusCode != tc.status {
 				t.Errorf("got http status %d, want: %d", res.StatusCode, tc.status)
@@ -300,7 +300,7 @@ func TestAuthResource_logout(t *testing.T) {
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			jwt := genJWT(jwtauth.Claims{"token": tc.token, "exp": time.Minute * tc.exp})
+			jwt := genJWT(jwtgo.MapClaims{"token": tc.token, "exp": time.Minute * tc.exp})
 			res, body := testRequest(t, ts, "POST", "/logout", nil, jwt)
 			if res.StatusCode != tc.status {
 				t.Errorf("got http status %d, want: %d", res.StatusCode, tc.status)
@@ -343,7 +343,7 @@ func testRequest(t *testing.T, ts *httptest.Server, method, path string, body io
 	return resp, string(respBody)
 }
 
-func genJWT(c jwtauth.Claims) string {
+func genJWT(c jwtgo.MapClaims) string {
 	_, tokenString, _ := auth.TokenAuth.JwtAuth.Encode(c)
 	return tokenString
 }

@@ -6,15 +6,16 @@ require (
 	github.com/andybalholm/cascadia v1.0.0 // indirect
 	github.com/asaskevich/govalidator v0.0.0-20180720115003-f9ffefc3facf // indirect
 	github.com/coreos/etcd v3.3.11+incompatible // indirect
-	github.com/dgrijalva/jwt-go v3.2.0+incompatible // indirect
+	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/go-chi/chi v4.0.0+incompatible
 	github.com/go-chi/cors v1.0.0
 	github.com/go-chi/docgen v1.0.2
-	github.com/go-chi/jwtauth v3.3.0+incompatible
+	github.com/go-chi/jwtauth v0.0.0-20190109153619-47840abb19b3
 	github.com/go-chi/render v1.0.1
 	github.com/go-ozzo/ozzo-validation v3.5.0+incompatible
 	github.com/go-pg/migrations v6.2.0+incompatible
 	github.com/go-pg/pg v7.1.5+incompatible
+	github.com/gofrs/uuid v3.2.0+incompatible
 	github.com/google/pprof v0.0.0-20190109223431-e84dfd68c163 // indirect
 	github.com/gorilla/css v1.0.0 // indirect
 	github.com/ianlancetaylor/demangle v0.0.0-20181102032728-5e5cf60278f6 // indirect

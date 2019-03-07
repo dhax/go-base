@@ -5,11 +5,11 @@ require (
 	github.com/PuerkitoBio/goquery v1.4.1 // indirect
 	github.com/andybalholm/cascadia v1.0.0 // indirect
 	github.com/asaskevich/govalidator v0.0.0-20180720115003-f9ffefc3facf // indirect
-	github.com/dgrijalva/jwt-go v3.2.0+incompatible
+	github.com/dgrijalva/jwt-go v3.2.0+incompatible // indirect
 	github.com/go-chi/chi v4.0.0+incompatible
 	github.com/go-chi/cors v1.0.0
 	github.com/go-chi/docgen v1.0.2
-	github.com/go-chi/jwtauth v0.0.0-20190109153619-47840abb19b3
+	github.com/go-chi/jwtauth v3.3.0+incompatible
 	github.com/go-chi/render v1.0.1
 	github.com/go-mail/mail v2.3.1+incompatible
 	github.com/go-ozzo/ozzo-validation v3.5.0+incompatible
@@ -39,5 +39,6 @@ require (
 	golang.org/x/sys v0.0.0-20190109145017-48ac38b7c8cb // indirect
 	gopkg.in/alexcesaro/quotedprintable.v3 v3.0.0-20150716171945-2caba252f4dc // indirect
 	gopkg.in/check.v1 v1.0.0-20180628173108-788fd7840127 // indirect
+	gopkg.in/mail.v2 v2.3.1 // indirect
 	mellium.im/sasl v0.2.1 // indirect
 )

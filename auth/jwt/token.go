@@ -3,7 +3,7 @@ package jwt
 import (
 	"time"
 
-	"github.com/dgrijalva/jwt-go"
+	"github.com/go-chi/jwtauth"
 	"github.com/go-pg/pg/orm"
 )
 
@@ -37,8 +37,8 @@ func (t *Token) BeforeUpdate(db orm.DB) error {
 }
 
 // Claims returns the token claims to be signed
-func (t *Token) Claims() jwt.MapClaims {
-	return jwt.MapClaims{
+func (t *Token) Claims() jwtauth.Claims {
+	return jwtauth.Claims{
 		"id":    t.ID,
 		"token": t.Token,
 	}

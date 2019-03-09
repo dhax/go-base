@@ -40,8 +40,14 @@ Besides /auth/* the API provides to main routes /api/* and /admin/* to distingui
 
 Check [routes.md](routes.md) file for an overview of the provided API routes.
 
+
+### Client API Access and CORS
+The server is configured to serve a Progressive Web App (PWA) client from it's "public" folder. this is where you put the contents of your client's build "dist" folder into. In this case enabling CORS is not required, because the client is served from the same host as the api.
+
+If you want to access the api from a client that is serverd from a different host, including e.g. a development live reloading server, you must enable CORS on the server first by setting an environment variable ENABLE_CORS=true for the server to acceept api connections from clients serverd by other hosts.
+
 #### Demo client application
-For demonstration of the login and account management features this API also serves a [Vue.js](https://vuejs.org) Progressive Web App (PWA). The client's source code can be found [here](https://github.com/dhax/go-base-vue).
+For demonstration of the login and account management features this API serves a demo [Vue.js](https://vuejs.org) PWA. The client's source code can be found [here](https://github.com/dhax/go-base-vue).
 
 If no valid email smtp settings are provided by environment variables, emails will be print to stdout showing the login token. Use one of the following bootstrapped users for login:
 - admin@boot.io (has access to admin panel)
@@ -69,6 +75,7 @@ EMAIL_SMTP_USER | string || email smtp username
 EMAIL_SMTP_PASSWORD | string || email smtp password
 EMAIL_FROM_ADDRESS | string || from address used in sending emails
 EMAIL_FROM_NAME | string || from name used in sending emails
+ENABLE_CORS | bool | false | enable CORS requests
 
 ### Contributing
 

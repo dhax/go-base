@@ -19,7 +19,7 @@ type Server struct {
 // NewServer creates and configures an APIServer serving all application routes.
 func NewServer() (*Server, error) {
 	log.Println("configuring server...")
-	api, err := New()
+	api, err := New(viper.GetBool("enable_cors"))
 	if err != nil {
 		return nil, err
 	}

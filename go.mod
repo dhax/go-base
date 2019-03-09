@@ -39,5 +39,6 @@ require (
 	golang.org/x/sys v0.0.0-20190109145017-48ac38b7c8cb // indirect
 	gopkg.in/alexcesaro/quotedprintable.v3 v3.0.0-20150716171945-2caba252f4dc // indirect
 	gopkg.in/check.v1 v1.0.0-20180628173108-788fd7840127 // indirect
+	gopkg.in/mail.v2 v2.3.1 // indirect
 	mellium.im/sasl v0.2.1 // indirect
 )

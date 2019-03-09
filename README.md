@@ -69,6 +69,7 @@ EMAIL_SMTP_USER | string || email smtp username
 EMAIL_SMTP_PASSWORD | string || email smtp password
 EMAIL_FROM_ADDRESS | string || from address used in sending emails
 EMAIL_FROM_NAME | string || from name used in sending emails
+ENABLE_CORS | bool | false | enable CORS requests
 
 ### Contributing
 

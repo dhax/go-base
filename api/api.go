@@ -22,7 +22,7 @@ import (
 )
 
 // New configures application resources and routes.
-func New() (*chi.Mux, error) {
+func New(enableCORS bool) (*chi.Mux, error) {
 	logger := logging.NewLogger()
 
 	db, err := database.DBConn()
@@ -67,7 +67,9 @@ func New() (*chi.Mux, error) {
 	r.Use(render.SetContentType(render.ContentTypeJSON))
 
 	// use CORS middleware if client is not served by this api, e.g. from other domain or CDN
-	// r.Use(corsConfig().Handler)
+	if enableCORS {
+		r.Use(corsConfig().Handler)
+	}
 
 	r.Mount("/auth", authResource.Router())
 	r.Group(func(r chi.Router) {

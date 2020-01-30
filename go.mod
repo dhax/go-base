@@ -42,3 +42,5 @@ require (
 	gopkg.in/mail.v2 v2.3.1 // indirect
 	mellium.im/sasl v0.2.1 // indirect
 )
+
+go 1.13

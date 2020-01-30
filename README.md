@@ -62,7 +62,11 @@ Name | Type | Default | Description
 PORT | string | localhost:3000 | http address (accepts also port number only for heroku compability)  
 LOG_LEVEL | string | debug | log level
 LOG_TEXTLOGGING | bool | false | defaults to json logging
-DATABASE_URL | string | postgres://postgres:postgres<br>@localhost:5432/gobase?sslmode=disable | PostgreSQL connection string
+DB_NETWORK | string | tcp | database 'tcp' or 'unix' connection
+DB_ADDR | string | localhost:5432 | database tcp address or unix socket
+DB_USER | string | postgres | database user name
+DB_PASSWORD | string | postgres | database user password
+DB_DATABASE | string | gobase | database shema name
 AUTH_LOGIN_URL | string | http://localhost:3000/login | client login url as sent in login token email
 AUTH_LOGIN_TOKEN_LENGTH | int | 8 | length of login token
 AUTH_LOGIN_TOKEN_EXPIRY | time.Duration | 11m | login token expiry

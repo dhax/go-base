@@ -102,7 +102,11 @@ func (m *message) parse() error {
 	if err := templates.ExecuteTemplate(buf, m.template, m.content); err != nil {
 		return err
 	}
-	prem := premailer.NewPremailerFromString(buf.String(), premailer.NewOptions())
+	prem, err := premailer.NewPremailerFromString(buf.String(), premailer.NewOptions())
+	if err != nil {
+		return err
+	}
+
 	html, err := prem.Transform()
 	if err != nil {
 		return err

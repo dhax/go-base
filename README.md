@@ -6,7 +6,9 @@ Easily extendible RESTful API boilerplate aiming to follow idiomatic go and best
 
 The goal of this boiler is to have a solid and structured foundation to build upon on.
 
-### Features
+Any feedback and pull requests are welcome and highly appreciated. Feel free to open issues just for comments and discussions.
+
+## Features
 The following feature set is a minimal selection of typical Web API requirements:
 
 - Configuration using [viper](https://github.com/spf13/viper)
@@ -14,19 +16,20 @@ The following feature set is a minimal selection of typical Web API requirements
 - PostgreSQL support including migrations using [go-pg](https://github.com/go-pg/pg)
 - Structured logging with [Logrus](https://github.com/sirupsen/logrus)
 - Routing with [chi router](https://github.com/go-chi/chi) and middleware
-- JWT Authentication using [jwt-go](https://github.com/dgrijalva/jwt-go) in combination with passwordless email authentication (could be easily extended to use passwords instead)
+- JWT Authentication using [jwt-go](https://github.com/dgrijalva/jwt-go) with example passwordless email authentication
 - Request data validation using [ozzo-validation](https://github.com/go-ozzo/ozzo-validation)
 - HTML emails with [gomail](https://github.com/go-gomail/gomail)
 
-### Start Application
+## Start Application
 - Clone this repository
 - Create a postgres database and set environment variable *DATABASE_URL* accordingly if not using same as default
-- Build the application: ```go build``` to create ```go-base``` binary
-- Initialize the database and run all migrations found in ./database/migrate with: ```go-base migrate```
-- Run the application: ```go-base serve```
+- Run the application to see available commands: ```go run main.go```
+- First initialize the database running all migrations found in ./database/migrate at once with command *migrate*: ```go run main.go migrate```
+- Run the application with command *serve*: ```go run main.go serve```
 
-### API Routes
+## API Routes
 
+### Authentication
 For passwordless login following routes are available:
 
 Path | Method | Required JSON | Header | Description
@@ -36,20 +39,23 @@ Path | Method | Required JSON | Header | Description
 /auth/refresh | POST | | Authorization: "Bearer refresh_token" | refresh JWTs
 /auth/logout | POST | | Authorizaiton: "Bearer refresh_token" | logout from this device
 
-Besides /auth/* the API provides to main routes /api/* and /admin/* to distinguish between application and administration features. The latter requires to be logged in as administrator by providing the respective JWT in Authorization Header.
+### Example API
+Besides /auth/* the API provides two main routes /api/* and /admin/*, as an example to separate application and administration context. The latter requires to be logged in as administrator by providing the respective JWT in Authorization Header.
 
-Check [routes.md](routes.md) file for an overview of the provided API routes.
+Check [routes.md](routes.md) for a generated overview of the provided API routes.
 
 
 ### Client API Access and CORS
-The server is configured to serve a Progressive Web App (PWA) client from it's "public" folder. this is where you put the contents of your client's build "dist" folder into. In this case enabling CORS is not required, because the client is served from the same host as the api.
+The server is configured to serve a Progressive Web App (PWA) client from *./public* folder (this repo only serves an example index.html, see below for a demo PWA client to put here). In this case enabling CORS is not required, because the client is served from the same host as the api.
 
-If you want to access the api from a client that is serverd from a different host, including e.g. a development live reloading server, you must enable CORS on the server first by setting an environment variable ENABLE_CORS=true for the server to acceept api connections from clients serverd by other hosts.
+If you want to access the api from a client that is serverd from a different host, including e.g. a development live reloading server with below demo client, you must enable CORS on the server first by setting environment variable *ENABLE_CORS=true* on the server to allow api connections from clients serverd by other hosts.
 
 #### Demo client application
-For demonstration of the login and account management features this API serves a demo [Vue.js](https://vuejs.org) PWA. The client's source code can be found [here](https://github.com/dhax/go-base-vue).
+For demonstration of the login and account management features this API serves a demo [Vue.js](https://vuejs.org) PWA. The client's source code can be found [here](https://github.com/dhax/go-base-vue). Build and put it into the api's *./public* folder, or use the live development server (requires CORS enabled).
 
-If no valid email smtp settings are provided by environment variables, emails will be print to stdout showing the login token. Use one of the following bootstrapped users for login:
+Outgoing emails containing the login token will be print to stdout if no valid email smtp settings are provided by environment variables (see table below). If *EMAIL_SMTP_HOST* is set but the host can not be reached the application will exit immediately at start.
+
+Use one of the following bootstrapped users for login:
 - admin@boot.io (has access to admin panel)
 - user@boot.io
 
@@ -81,9 +87,8 @@ EMAIL_FROM_ADDRESS | string || from address used in sending emails
 EMAIL_FROM_NAME | string || from name used in sending emails
 ENABLE_CORS | bool | false | enable CORS requests
 
-### Contributing
-
-Any feedback and pull requests are welcome and highly appreciated. Please open an issue first if you intend to send in a larger pull request or want to add additional features.
+### Testing
+Package auth/pwdless contains example api tests using a mocked database.
 
 [GoDoc]: https://godoc.org/github.com/dhax/go-base
 [GoDoc Badge]: https://godoc.org/github.com/dhax/go-base?status.svg

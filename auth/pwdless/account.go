@@ -4,11 +4,11 @@ import (
 	"strings"
 	"time"
 
-	"github.com/dhax/go-base/auth/jwt"
-	"github.com/go-chi/jwtauth"
 	validation "github.com/go-ozzo/ozzo-validation"
 	"github.com/go-ozzo/ozzo-validation/is"
 	"github.com/go-pg/pg/orm"
+
+	"github.com/dhax/go-base/auth/jwt"
 )
 
 // Account represents an authenticated application user
@@ -65,10 +65,10 @@ func (a *Account) CanLogin() bool {
 }
 
 // Claims returns the account's claims to be signed
-func (a *Account) Claims() jwtauth.Claims {
-	return jwtauth.Claims{
-		"id":    a.ID,
-		"sub":   a.Name,
-		"roles": a.Roles,
+func (a *Account) Claims() jwt.AppClaims {
+	return jwt.AppClaims{
+		ID:    a.ID,
+		Sub:   a.Name,
+		Roles: a.Roles,
 	}
 }

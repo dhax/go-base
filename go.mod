@@ -6,11 +6,11 @@ require (
 	github.com/andybalholm/cascadia v1.0.0 // indirect
 	github.com/asaskevich/govalidator v0.0.0-20180720115003-f9ffefc3facf // indirect
 	github.com/coreos/go-etcd v2.0.0+incompatible // indirect
-	github.com/dgrijalva/jwt-go v3.2.0+incompatible // indirect
+	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/go-chi/chi v4.0.3+incompatible
 	github.com/go-chi/cors v1.0.0
 	github.com/go-chi/docgen v1.0.5
-	github.com/go-chi/jwtauth v3.3.0+incompatible
+	github.com/go-chi/jwtauth v4.0.4+incompatible
 	github.com/go-chi/render v1.0.1
 	github.com/go-mail/mail v2.3.1+incompatible
 	github.com/go-ozzo/ozzo-validation v3.5.0+incompatible

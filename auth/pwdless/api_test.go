@@ -14,8 +14,8 @@ import (
 	"testing"
 	"time"
 
+	jwt_go "github.com/dgrijalva/jwt-go"
 	"github.com/go-chi/chi"
-	"github.com/go-chi/jwtauth"
 	"github.com/spf13/viper"
 
 	"github.com/dhax/go-base/auth/jwt"
@@ -209,7 +209,7 @@ func TestAuthResource_refresh(t *testing.T) {
 		t.Expiry = time.Now().Add(1 * time.Minute)
 
 		switch token {
-		case "notfound":
+		case "not_found":
 			err = errors.New("sql no rows")
 		case "expired":
 			t.Expiry = time.Now().Add(-1 * time.Minute)
@@ -232,16 +232,26 @@ func TestAuthResource_refresh(t *testing.T) {
 		status int
 		err    error
 	}{
-		{"notfound", "notfound", 1, http.StatusUnauthorized, jwt.ErrTokenExpired},
-		{"expired", "expired", -1, http.StatusUnauthorized, jwt.ErrTokenUnauthorized},
+		{"not_found", "not_found", 1, http.StatusUnauthorized, jwt.ErrTokenExpired},
+		{"expired", "expired", -1, http.StatusUnauthorized, jwt.ErrTokenExpired},
 		{"disabled", "disabled", 1, http.StatusUnauthorized, ErrLoginDisabled},
 		{"valid", "valid", 1, http.StatusOK, nil},
 	}
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			jwt := genJWT(jwtauth.Claims{"token": tc.token, "exp": time.Minute * tc.exp})
-			res, body := testRequest(t, ts, "POST", "/refresh", nil, jwt)
+			// refreshJWT, err := auth.TokenAuth.CreateRefreshJWT(jwt.RefreshClaims{Token: tc.token})
+			// if err != nil {
+			// 	t.Errorf("failed to create refresh jwt")
+			// }
+			refreshJWT := genRefreshJWT(jwt.RefreshClaims{
+				Token: tc.token,
+				StandardClaims: jwt_go.StandardClaims{
+					ExpiresAt: time.Now().Add(time.Minute * tc.exp).UnixNano(),
+				},
+			})
+
+			res, body := testRequest(t, ts, "POST", "/refresh", nil, refreshJWT)
 			if res.StatusCode != tc.status {
 				t.Errorf("got http status %d, want: %d", res.StatusCode, tc.status)
 			}
@@ -294,14 +304,20 @@ func TestAuthResource_logout(t *testing.T) {
 		err    error
 	}{
 		{"notfound", "notfound", 1, http.StatusUnauthorized, jwt.ErrTokenExpired},
-		{"expired", "valid", -1, http.StatusUnauthorized, jwt.ErrTokenUnauthorized},
+		{"expired", "valid", -1, http.StatusOK, nil},
 		{"valid", "valid", 1, http.StatusOK, nil},
 	}
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			jwt := genJWT(jwtauth.Claims{"token": tc.token, "exp": time.Minute * tc.exp})
-			res, body := testRequest(t, ts, "POST", "/logout", nil, jwt)
+			refreshJWT := genRefreshJWT(jwt.RefreshClaims{
+				Token: tc.token,
+				StandardClaims: jwt_go.StandardClaims{
+					ExpiresAt: time.Now().Add(time.Minute * tc.exp).UnixNano(),
+				},
+			})
+
+			res, body := testRequest(t, ts, "POST", "/logout", nil, refreshJWT)
 			if res.StatusCode != tc.status {
 				t.Errorf("got http status %d, want: %d", res.StatusCode, tc.status)
 			}
@@ -343,7 +359,11 @@ func testRequest(t *testing.T, ts *httptest.Server, method, path string, body io
 	return resp, string(respBody)
 }
 
-func genJWT(c jwtauth.Claims) string {
+func genJWT(c jwt.AppClaims) string {
+	_, tokenString, _ := auth.TokenAuth.JwtAuth.Encode(c)
+	return tokenString
+}
+func genRefreshJWT(c jwt.RefreshClaims) string {
 	_, tokenString, _ := auth.TokenAuth.JwtAuth.Encode(c)
 	return tokenString
 }

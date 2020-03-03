@@ -3,7 +3,6 @@ package jwt
 import (
 	"time"
 
-	"github.com/go-chi/jwtauth"
 	"github.com/go-pg/pg/orm"
 )
 
@@ -37,9 +36,9 @@ func (t *Token) BeforeUpdate(db orm.DB) error {
 }
 
 // Claims returns the token claims to be signed
-func (t *Token) Claims() jwtauth.Claims {
-	return jwtauth.Claims{
-		"id":    t.ID,
-		"token": t.Token,
+func (t *Token) Claims() RefreshClaims {
+	return RefreshClaims{
+		ID:    t.ID,
+		Token: t.Token,
 	}
 }

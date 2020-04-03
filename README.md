@@ -62,6 +62,7 @@ Use one of the following bootstrapped users for login:
 A deployed version can also be found on [Heroku](https://govue.herokuapp.com)
 
 ### Environment Variables
+By default cobra will look at $HOME/.go-base.yaml for a config file. Setting your config as Environment Variables is recommended as by 12-Factor App.
 
 Name | Type | Default | Description
 ---|---|---|---

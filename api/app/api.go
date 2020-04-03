@@ -17,12 +17,14 @@ type ctxKey int
 const (
 	ctxAccount ctxKey = iota
 	ctxProfile
+	ctxReport
 )
 
 // API provides application resources and handlers.
 type API struct {
 	Account *AccountResource
 	Profile *ProfileResource
+	Report *ReportResource
 }
 
 // NewAPI configures and returns application API.
@@ -33,9 +35,13 @@ func NewAPI(db *pg.DB) (*API, error) {
 	profileStore := database.NewProfileStore(db)
 	profile := NewProfileResource(profileStore)
 
+	reportStore := database.NewReportStore(db)
+	report := NewReportResource(reportStore)
+
 	api := &API{
 		Account: account,
 		Profile: profile,
+		Report: report,
 	}
 	return api, nil
 }
@@ -46,6 +52,7 @@ func (a *API) Router() *chi.Mux {
 
 	r.Mount("/account", a.Account.router())
 	r.Mount("/profile", a.Profile.router())
+	r.Mount("/report", a.Report.router())
 
 	return r
 }

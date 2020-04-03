@@ -22,7 +22,7 @@ The following feature set is a minimal selection of typical Web API requirements
 
 ## Start Application
 - Clone this repository
-- Create a postgres database and set environment variable *DATABASE_URL* accordingly if not using same as default
+- Create a postgres database and set environment variables for your database accordingly if not using same as default
 - Run the application to see available commands: ```go run main.go```
 - First initialize the database running all migrations found in ./database/migrate at once with command *migrate*: ```go run main.go migrate```
 - Run the application with command *serve*: ```go run main.go serve```

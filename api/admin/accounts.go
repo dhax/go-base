@@ -88,11 +88,11 @@ func newAccountResponse(a *pwdless.Account) *accountResponse {
 }
 
 type accountListResponse struct {
-	Accounts []pwdless.Account `json:"accounts"`
-	Count    int               `json:"count"`
+	Accounts *[]pwdless.Account `json:"accounts"`
+	Count    int                `json:"count"`
 }
 
-func newAccountListResponse(a []pwdless.Account, count int) *accountListResponse {
+func newAccountListResponse(a *[]pwdless.Account, count int) *accountListResponse {
 	resp := &accountListResponse{
 		Accounts: a,
 		Count:    count,
@@ -111,7 +111,7 @@ func (rs *AccountResource) list(w http.ResponseWriter, r *http.Request) {
 		render.Render(w, r, ErrRender(err))
 		return
 	}
-	render.Respond(w, r, newAccountListResponse(al, count))
+	render.Respond(w, r, newAccountListResponse(&al, count))
 }
 
 func (rs *AccountResource) create(w http.ResponseWriter, r *http.Request) {

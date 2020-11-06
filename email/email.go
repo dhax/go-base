@@ -3,6 +3,7 @@ package email
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"html/template"
 	"log"
@@ -12,7 +13,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/go-mail/mail"
+	"github.com/sendgrid/sendgrid-go"
+	"github.com/sendgrid/sendgrid-go/helpers/mail"
+
+	// "github.com/go-mail/mail"
 	"github.com/jaytaylor/html2text"
 	"github.com/spf13/viper"
 	"github.com/vanng822/go-premailer/premailer"
@@ -25,7 +29,7 @@ var (
 
 // Mailer is a SMTP mailer.
 type Mailer struct {
-	client *mail.Dialer
+	client *sendgrid.Client
 	from   Email
 }
 
@@ -35,35 +39,49 @@ func NewMailer() (*Mailer, error) {
 		return nil, err
 	}
 
-	smtp := struct {
-		Host     string
-		Port     int
-		User     string
-		Password string
-	}{
-		viper.GetString("email_smtp_host"),
-		viper.GetInt("email_smtp_port"),
-		viper.GetString("email_smtp_user"),
-		viper.GetString("email_smtp_password"),
+	// usage with sendgrid api key client
+	apiKey := viper.GetString("SENDGRID_API_KEY")
+	if apiKey == "" {
+		return nil, errors.New("missing sendgrid api key")
 	}
+	client := sendgrid.NewSendClient(apiKey)
 
-	s := &Mailer{
-		client: mail.NewPlainDialer(smtp.Host, smtp.Port, smtp.User, smtp.Password),
+	mailer := &Mailer{
+		client: client,
 		from:   NewEmail(viper.GetString("email_from_name"), viper.GetString("email_from_address")),
 	}
+	return mailer, nil
 
-	if smtp.Host == "" {
-		log.Println("SMTP host not set => printing emails to stdout")
-		debug = true
-		return s, nil
-	}
+	// usage with go-mail basic smtp auth client
+	// smtp := struct {
+	// 	Host     string
+	// 	Port     int
+	// 	User     string
+	// 	Password string
+	// }{
+	// 	viper.GetString("email_smtp_host"),
+	// 	viper.GetInt("email_smtp_port"),
+	// 	viper.GetString("email_smtp_user"),
+	// 	viper.GetString("email_smtp_password"),
+	// }
 
-	d, err := s.client.Dial()
-	if err == nil {
-		d.Close()
-		return s, nil
-	}
-	return nil, err
+	// s := &Mailer{
+	// 	client: mail.NewDialer(smtp.Host, smtp.Port, smtp.User, smtp.Password),
+	// 	from:   NewEmail(viper.GetString("email_from_name"), viper.GetString("email_from_address")),
+	// }
+
+	// if smtp.Host == "" {
+	// 	log.Println("SMTP host not set => printing emails to stdout")
+	// 	debug = true
+	// 	return s, nil
+	// }
+
+	// d, err := s.client.Dial()
+	// if err != nil {
+	// 	return nil, err
+	// }
+	// d.Close()
+	// return s, nil
 }
 
 // Send sends the mail via smtp.
@@ -75,14 +93,33 @@ func (m *Mailer) Send(email *message) error {
 		return nil
 	}
 
-	msg := mail.NewMessage()
-	msg.SetAddressHeader("From", email.from.Address, email.from.Name)
-	msg.SetAddressHeader("To", email.to.Address, email.to.Name)
-	msg.SetHeader("Subject", email.subject)
-	msg.SetBody("text/plain", email.text)
-	msg.AddAlternative("text/html", email.html)
+	// usage with sendgrid
+	from := mail.NewEmail(email.from.Name, email.from.Address)
+	to := mail.NewEmail(email.to.Name, email.to.Address)
+	message := mail.NewSingleEmail(from, email.subject, to, email.text, email.html)
 
-	return m.client.DialAndSend(msg)
+	response, err := m.client.Send(message)
+	if err != nil {
+		return err
+	}
+
+	if debug {
+		log.Println(response.StatusCode)
+		log.Println(response.Body)
+		log.Println(response.Headers)
+	}
+
+	return nil
+
+	// usage with go-mail
+	// msg := mail.NewMessage()
+	// msg.SetAddressHeader("From", email.from.Address, email.from.Name)
+	// msg.SetAddressHeader("To", email.to.Address, email.to.Name)
+	// msg.SetHeader("Subject", email.subject)
+	// msg.SetBody("text/plain", email.text)
+	// msg.AddAlternative("text/html", email.html)
+
+	// return m.client.DialAndSend(msg)
 }
 
 // message struct holds all parts of a specific email message.

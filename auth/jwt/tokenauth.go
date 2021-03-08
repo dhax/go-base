@@ -61,7 +61,7 @@ func (a *TokenAuth) CreateJWT(c AppClaims) (string, error) {
 // CreateRefreshJWT returns a refresh token for provided token Claims.
 func (a *TokenAuth) CreateRefreshJWT(c RefreshClaims) (string, error) {
 	c.IssuedAt = time.Now().Unix()
-	c.ExpiresAt = time.Now().Add(a.JwtExpiry).Unix()
+	c.ExpiresAt = time.Now().Add(a.JwtRefreshExpiry).Unix()
 	_, tokenString, err := a.JwtAuth.Encode(c)
 	return tokenString, err
 }

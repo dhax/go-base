@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/go-chi/chi/middleware"
+	"github.com/go-chi/chi/v5/middleware"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 )
@@ -76,7 +76,7 @@ func (l *StructuredLogger) NewLogEntry(r *http.Request) middleware.LogEntry {
 	logFields["user_agent"] = r.UserAgent()
 
 	logFields["uri"] = fmt.Sprintf("%s://%s%s", scheme, r.Host, r.RequestURI)
-	logFields["uri"] = fmt.Sprintf("%s", r.RequestURI)
+	logFields["uri"] = r.RequestURI
 
 	entry.Logger = entry.Logger.WithFields(logFields)
 
@@ -90,7 +90,7 @@ type StructuredLoggerEntry struct {
 	Logger logrus.FieldLogger
 }
 
-func (l *StructuredLoggerEntry) Write(status, bytes int, elapsed time.Duration) {
+func (l *StructuredLoggerEntry) Write(status, bytes int, header http.Header, elapsed time.Duration, extra interface{}) {
 	l.Logger = l.Logger.WithFields(logrus.Fields{
 		"resp_status":       status,
 		"resp_bytes_length": bytes,

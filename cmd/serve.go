@@ -26,7 +26,7 @@ func init() {
 	RootCmd.AddCommand(serveCmd)
 
 	// Here you will define your flags and configuration settings.
-	viper.SetDefault("port", "localhost:3000")
+	viper.SetDefault("port", "3000")
 	viper.SetDefault("log_level", "debug")
 
 	viper.SetDefault("auth_login_url", "http://localhost:3000/login")

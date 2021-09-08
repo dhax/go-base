@@ -1,0 +1,42 @@
+version: "3.8"
+
+volumes:
+  postgres:
+
+services:
+  server:
+    build:
+      context: .
+    depends_on:
+      - postgres
+    ports:
+      - 3000:3000
+    environment:
+      LOG_LEVEL: debug
+      LOG_TEXTLOGGING: "true"
+      #PORT: 3000
+      DB_ADDR: postgres:5432
+      #DB_USER: postgres
+      #DB_PASSWORD: postgres
+      #DB_DATABASE: postgres
+      #AUTH_JWT_EXPIRY: 1h
+      #AUTH_JWT_REFRESH_EXPIRY: 72h
+      #AUTH_JWT_SECRET: my secret
+      #SENDGRID_API_KEY: your-sendgrid-api-key
+      #EMAIL_FROM_ADDRESS: go-base
+      #EMAIL_FROM_NAME: Go Base
+      #EMAIL_SMTP_HOST:
+      #EMAIL_SMTP_PORT: 465
+      #EMAIL_SMTP_USER:
+      #EMAIL_SMTP_PASSWORD:
+      ENABLE_CORS: "true"
+
+  postgres:
+    image: postgres:13
+    restart: unless-stopped
+    ports:
+      - 5432:5432
+    volumes:
+      - postgres:/var/lib/postgresql/data
+    environment:
+      POSTGRES_PASSWORD: postgres

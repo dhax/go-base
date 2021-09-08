@@ -1,19 +1,26 @@
-FROM golang:alpine AS builder
+FROM golang AS builder
+
+WORKDIR /src
+# Download dependencies
+COPY go.mod go.sum /
+RUN go mod download
 
 # Add source code
-ADD ./ /go/src/github.com/dhax/go-base/
-
-RUN cd /go/src/github.com/dhax/go-base && \       
-    go build && \
-    mv ./go-base /usr/bin/go-base
+COPY . .
+RUN CGO_ENABLED=0 go build -o main .
 
 # Multi-Stage production build
-FROM alpine
+FROM alpine AS production
+RUN apk --no-cache add ca-certificates
 
-RUN apk add --update ca-certificates
-
+WORKDIR /app
 # Retrieve the binary from the previous stage
-COPY --from=builder /usr/bin/go-base /usr/local/bin/go-base
-
+COPY --from=builder /src/main .
+# Copy static template files
+COPY templates templates
+# Copy frontend
+COPY public public
+# Expose port
+EXPOSE 3000
 # Set the binary as the entrypoint of the container
-CMD ["go-base", "serve"]
+CMD ["./main", "serve"]

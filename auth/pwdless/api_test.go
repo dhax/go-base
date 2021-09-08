@@ -2,6 +2,7 @@ package pwdless
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -14,8 +15,8 @@ import (
 	"testing"
 	"time"
 
-	jwt_go "github.com/dgrijalva/jwt-go"
-	"github.com/go-chi/chi"
+	"github.com/go-chi/chi/v5"
+	jwx_jwt "github.com/lestrrat-go/jwx/jwt"
 	"github.com/spf13/viper"
 
 	"github.com/dhax/go-base/auth/jwt"
@@ -246,9 +247,6 @@ func TestAuthResource_refresh(t *testing.T) {
 			// }
 			refreshJWT := genRefreshJWT(jwt.RefreshClaims{
 				Token: tc.token,
-				StandardClaims: jwt_go.StandardClaims{
-					ExpiresAt: time.Now().Add(time.Minute * tc.exp).UnixNano(),
-				},
 			})
 
 			res, body := testRequest(t, ts, "POST", "/refresh", nil, refreshJWT)
@@ -312,9 +310,6 @@ func TestAuthResource_logout(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			refreshJWT := genRefreshJWT(jwt.RefreshClaims{
 				Token: tc.token,
-				StandardClaims: jwt_go.StandardClaims{
-					ExpiresAt: time.Now().Add(time.Minute * tc.exp).UnixNano(),
-				},
 			})
 
 			res, body := testRequest(t, ts, "POST", "/logout", nil, refreshJWT)
@@ -340,7 +335,7 @@ func testRequest(t *testing.T, ts *httptest.Server, method, path string, body io
 	}
 	req.Header.Set("Content-Type", "application/json")
 	if token != "" {
-		req.Header.Set("Authorization", "BEARER "+token)
+		req.Header.Set("Authorization", fmt.Sprintf("BEARER %s", token))
 	}
 
 	resp, err := http.DefaultClient.Do(req)
@@ -359,12 +354,30 @@ func testRequest(t *testing.T, ts *httptest.Server, method, path string, body io
 	return resp, string(respBody)
 }
 
-func genJWT(c jwt.AppClaims) string {
-	_, tokenString, _ := auth.TokenAuth.JwtAuth.Encode(c)
-	return tokenString
-}
+// func genJWT(c jwt.AppClaims) string {
+// 	token := jwx_jwt.New()
+// 	token.Set(jwx_jwt.IssuedAtKey, time.Now().Unix())
+// 	token.Set(jwx_jwt.ExpirationKey, time.Now().Add(time.Duration(time.Minute)).Unix())
+// 	tokenMap, err := token.AsMap(context.Background())
+// 	if err != nil {
+// 		return ""
+// 	}
+// 	_, tokenString, _ := auth.TokenAuth.JwtAuth.Encode(tokenMap)
+// 	return tokenString
+// }
+
 func genRefreshJWT(c jwt.RefreshClaims) string {
-	_, tokenString, _ := auth.TokenAuth.JwtAuth.Encode(c)
+	token := jwx_jwt.New()
+	token.Set(jwx_jwt.IssuedAtKey, time.Now())
+	token.Set(jwx_jwt.ExpirationKey, time.Now().Add(time.Duration(time.Minute)))
+
+	token.Set(`token`, c.Token)
+
+	tokenMap, err := token.AsMap(context.Background())
+	if err != nil {
+		return ""
+	}
+	_, tokenString, _ := auth.TokenAuth.JwtAuth.Encode(tokenMap)
 	return tokenString
 }
 

@@ -4,7 +4,7 @@ import (
 	"context"
 	"net/http"
 
-	"github.com/go-chi/jwtauth"
+	"github.com/go-chi/jwtauth/v5"
 	"github.com/go-chi/render"
 
 	"github.com/dhax/go-base/logging"
@@ -32,16 +32,11 @@ func RefreshTokenFromCtx(ctx context.Context) string {
 // response for any unverified tokens and passes the good ones through.
 func Authenticator(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		token, claims, err := jwtauth.FromContext(r.Context())
+		_, claims, err := jwtauth.FromContext(r.Context())
 
 		if err != nil {
 			logging.GetLogEntry(r).Warn(err)
 			render.Render(w, r, ErrUnauthorized(ErrTokenUnauthorized))
-			return
-		}
-
-		if !token.Valid {
-			render.Render(w, r, ErrUnauthorized(ErrTokenExpired))
 			return
 		}
 
@@ -63,14 +58,10 @@ func Authenticator(next http.Handler) http.Handler {
 // AuthenticateRefreshJWT checks validity of refresh tokens and is only used for access token refresh and logout requests. It responds with 401 Unauthorized for invalid or expired refresh tokens.
 func AuthenticateRefreshJWT(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		token, claims, err := jwtauth.FromContext(r.Context())
+		_, claims, err := jwtauth.FromContext(r.Context())
 		if err != nil {
 			logging.GetLogEntry(r).Warn(err)
 			render.Render(w, r, ErrUnauthorized(ErrTokenUnauthorized))
-			return
-		}
-		if !token.Valid {
-			render.Render(w, r, ErrUnauthorized(ErrTokenExpired))
 			return
 		}
 

@@ -15,8 +15,8 @@ import (
 	"github.com/dhax/go-base/database"
 	"github.com/dhax/go-base/email"
 	"github.com/dhax/go-base/logging"
-	"github.com/go-chi/chi"
-	"github.com/go-chi/chi/middleware"
+	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/cors"
 	"github.com/go-chi/render"
 )
@@ -60,7 +60,6 @@ func New(enableCORS bool) (*chi.Mux, error) {
 	r.Use(middleware.Recoverer)
 	r.Use(middleware.RequestID)
 	// r.Use(middleware.RealIP)
-	r.Use(middleware.DefaultCompress)
 	r.Use(middleware.Timeout(15 * time.Second))
 
 	r.Use(logging.NewStructuredLogger(logger))

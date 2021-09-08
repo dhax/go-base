@@ -10,7 +10,7 @@ import (
 	"github.com/dhax/go-base/database"
 	validation "github.com/go-ozzo/ozzo-validation"
 
-	"github.com/go-chi/chi"
+	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/render"
 )
 

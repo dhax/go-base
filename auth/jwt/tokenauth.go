@@ -1,11 +1,13 @@
 package jwt
 
 import (
+	"context"
 	"crypto/rand"
 	"net/http"
 	"time"
 
-	"github.com/go-chi/jwtauth"
+	"github.com/go-chi/jwtauth/v5"
+	"github.com/lestrrat-go/jwx/jwt"
 	"github.com/spf13/viper"
 )
 
@@ -52,17 +54,35 @@ func (a *TokenAuth) GenTokenPair(accessClaims AppClaims, refreshClaims RefreshCl
 
 // CreateJWT returns an access token for provided account claims.
 func (a *TokenAuth) CreateJWT(c AppClaims) (string, error) {
-	c.IssuedAt = time.Now().Unix()
-	c.ExpiresAt = time.Now().Add(a.JwtExpiry).Unix()
-	_, tokenString, err := a.JwtAuth.Encode(c)
+	token := jwt.New()
+	token.Set(jwt.IssuedAtKey, time.Now().Unix())
+	token.Set(jwt.ExpirationKey, time.Now().Add(a.JwtExpiry).Unix())
+
+	token.Set(jwt.SubjectKey, c.Sub)
+	token.Set(`id`, c.ID)
+	token.Set(`roles`, c.Roles)
+
+	tokenMap, err := token.AsMap(context.Background())
+	if err != nil {
+		return "", err
+	}
+	_, tokenString, err := a.JwtAuth.Encode(tokenMap)
 	return tokenString, err
 }
 
 // CreateRefreshJWT returns a refresh token for provided token Claims.
 func (a *TokenAuth) CreateRefreshJWT(c RefreshClaims) (string, error) {
-	c.IssuedAt = time.Now().Unix()
-	c.ExpiresAt = time.Now().Add(a.JwtRefreshExpiry).Unix()
-	_, tokenString, err := a.JwtAuth.Encode(c)
+	token := jwt.New()
+	token.Set(jwt.IssuedAtKey, time.Now().Unix())
+	token.Set(jwt.ExpirationKey, time.Now().Add(a.JwtRefreshExpiry).Unix())
+
+	token.Set(`token`, c.Token)
+
+	tokenMap, err := token.AsMap(context.Background())
+	if err != nil {
+		return "", err
+	}
+	_, tokenString, err := a.JwtAuth.Encode(tokenMap)
 	return tokenString, err
 }
 

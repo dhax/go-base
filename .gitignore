@@ -1,6 +1,7 @@
 .DS_STORE
 .vscode
 .realize.yaml
+.idea
 
 debug
 go-base

@@ -2,20 +2,22 @@ package jwt
 
 import (
 	"errors"
-
-	"github.com/dgrijalva/jwt-go"
 )
+type CommonClaims struct {
+	ExpiresAt int64  `json:"exp,omitempty"`
+	IssuedAt  int64  `json:"iat,omitempty"`
+}
 
 // AppClaims represent the claims parsed from JWT access token.
 type AppClaims struct {
 	ID    int      `json:"id,omitempty"`
 	Sub   string   `json:"sub,omitempty"`
 	Roles []string `json:"roles,omitempty"`
-	jwt.StandardClaims
+	CommonClaims
 }
 
 // ParseClaims parses JWT claims into AppClaims.
-func (c *AppClaims) ParseClaims(claims jwt.MapClaims) error {
+func (c *AppClaims) ParseClaims(claims map[string]interface{}) error {
 	id, ok := claims["id"]
 	if !ok {
 		return errors.New("could not parse claim id")
@@ -48,11 +50,11 @@ func (c *AppClaims) ParseClaims(claims jwt.MapClaims) error {
 type RefreshClaims struct {
 	ID    int    `json:"id,omitempty"`
 	Token string `json:"token,omitempty"`
-	jwt.StandardClaims
+	CommonClaims
 }
 
 // ParseClaims parses the JWT claims into RefreshClaims.
-func (c *RefreshClaims) ParseClaims(claims jwt.MapClaims) error {
+func (c *RefreshClaims) ParseClaims(claims map[string]interface{}) error {
 	token, ok := claims["token"]
 	if !ok {
 		return errors.New("could not parse claim token")

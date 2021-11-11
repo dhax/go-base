@@ -14,7 +14,6 @@ import (
 	"testing"
 	"time"
 
-	jwt_go "github.com/dgrijalva/jwt-go"
 	"github.com/go-chi/chi"
 	"github.com/spf13/viper"
 
@@ -246,7 +245,7 @@ func TestAuthResource_refresh(t *testing.T) {
 			// }
 			refreshJWT := genRefreshJWT(jwt.RefreshClaims{
 				Token: tc.token,
-				StandardClaims: jwt_go.StandardClaims{
+				CommonClaims: jwt.CommonClaims{
 					ExpiresAt: time.Now().Add(time.Minute * tc.exp).UnixNano(),
 				},
 			})
@@ -312,7 +311,7 @@ func TestAuthResource_logout(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			refreshJWT := genRefreshJWT(jwt.RefreshClaims{
 				Token: tc.token,
-				StandardClaims: jwt_go.StandardClaims{
+				CommonClaims: jwt.CommonClaims{
 					ExpiresAt: time.Now().Add(time.Minute * tc.exp).UnixNano(),
 				},
 			})
@@ -360,11 +359,15 @@ func testRequest(t *testing.T, ts *httptest.Server, method, path string, body io
 }
 
 func genJWT(c jwt.AppClaims) string {
-	_, tokenString, _ := auth.TokenAuth.JwtAuth.Encode(c)
+	claims, _ := jwt.ParseStructToMap(c)
+
+	_, tokenString, _ := auth.TokenAuth.JwtAuth.Encode(claims)
 	return tokenString
 }
 func genRefreshJWT(c jwt.RefreshClaims) string {
-	_, tokenString, _ := auth.TokenAuth.JwtAuth.Encode(c)
+	claims, _ := jwt.ParseStructToMap(c)
+
+	_, tokenString, _ := auth.TokenAuth.JwtAuth.Encode(claims)
 	return tokenString
 }
 

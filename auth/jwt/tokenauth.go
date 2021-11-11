@@ -2,6 +2,7 @@ package jwt
 
 import (
 	"crypto/rand"
+	"encoding/json"
 	"net/http"
 	"time"
 
@@ -54,15 +55,38 @@ func (a *TokenAuth) GenTokenPair(accessClaims AppClaims, refreshClaims RefreshCl
 func (a *TokenAuth) CreateJWT(c AppClaims) (string, error) {
 	c.IssuedAt = time.Now().Unix()
 	c.ExpiresAt = time.Now().Add(a.JwtExpiry).Unix()
-	_, tokenString, err := a.JwtAuth.Encode(c)
+
+	claims, err := ParseStructToMap(c)
+	if err != nil {
+		return "", err
+	}
+
+	_, tokenString, err := a.JwtAuth.Encode(claims)
 	return tokenString, err
+}
+
+func ParseStructToMap(c interface{}) (map[string]interface{}, error){
+	var claims map[string]interface{}
+	inrec, _ := json.Marshal(c)
+	err := json.Unmarshal(inrec, &claims)
+	if err != nil {
+		return nil, err
+	}
+
+	return claims, err
 }
 
 // CreateRefreshJWT returns a refresh token for provided token Claims.
 func (a *TokenAuth) CreateRefreshJWT(c RefreshClaims) (string, error) {
 	c.IssuedAt = time.Now().Unix()
 	c.ExpiresAt = time.Now().Add(a.JwtRefreshExpiry).Unix()
-	_, tokenString, err := a.JwtAuth.Encode(c)
+
+	claims, err := ParseStructToMap(c)
+	if err != nil {
+		return "", err
+	}
+
+	_, tokenString, err := a.JwtAuth.Encode(claims)
 	return tokenString, err
 }
 

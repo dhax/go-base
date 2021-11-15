@@ -17,7 +17,7 @@ require (
 	github.com/gorilla/css v1.0.0 // indirect
 	github.com/jaytaylor/html2text v0.0.0-20200220170450-61d9dc4d7195
 	github.com/jinzhu/inflection v0.0.0-20180308033659-04140366298a // indirect
-	github.com/lestrrat-go/jwx v1.2.10
+	github.com/lestrrat-go/jwx v1.2.11
 	github.com/mattn/go-runewidth v0.0.8 // indirect
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/mssola/user_agent v0.5.1

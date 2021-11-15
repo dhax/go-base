@@ -17,9 +17,9 @@ The following feature set is a minimal selection of typical Web API requirements
 - PostgreSQL support including migrations using [go-pg](https://github.com/go-pg/pg)
 - Structured logging with [Logrus](https://github.com/sirupsen/logrus)
 - Routing with [chi router](https://github.com/go-chi/chi) and middleware
-- JWT Authentication using [golang-jwt](https://github.com/golang-jwt/jwt/v4) with example passwordless email authentication
+- JWT Authentication using [lestrrat-go/jwx](https://github.com/lestrrat-go/jwx) with example passwordless email authentication
 - Request data validation using [ozzo-validation](https://github.com/go-ozzo/ozzo-validation)
-- HTML emails with [gomail](https://github.com/go-gomail/gomail)
+- HTML emails with [go-mail](https://github.com/go-mail/mail)
 
 ## Start Application
 

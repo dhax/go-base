@@ -17,7 +17,7 @@ require (
 	github.com/gorilla/css v1.0.0 // indirect
 	github.com/jaytaylor/html2text v0.0.0-20200220170450-61d9dc4d7195
 	github.com/jinzhu/inflection v0.0.0-20180308033659-04140366298a // indirect
-	github.com/lestrrat-go/jwx v1.1.6
+	github.com/lestrrat-go/jwx v1.2.10
 	github.com/mattn/go-runewidth v0.0.8 // indirect
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/mssola/user_agent v0.5.1
@@ -45,12 +45,13 @@ require (
 )
 
 require (
-	github.com/decred/dcrd/dcrec/secp256k1/v3 v3.0.0 // indirect
+	github.com/decred/dcrd/dcrec/secp256k1/v4 v4.0.0-20210816181553-5444fa50b93d // indirect
 	github.com/fsnotify/fsnotify v1.4.9 // indirect
-	github.com/goccy/go-json v0.4.8 // indirect
+	github.com/goccy/go-json v0.7.10 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/inconshreveable/mousetrap v1.0.0 // indirect
-	github.com/lestrrat-go/backoff/v2 v2.0.7 // indirect
+	github.com/lestrrat-go/backoff/v2 v2.0.8 // indirect
+	github.com/lestrrat-go/blackmagic v1.0.0 // indirect
 	github.com/lestrrat-go/httpcc v1.0.0 // indirect
 	github.com/lestrrat-go/iter v1.0.1 // indirect
 	github.com/lestrrat-go/option v1.0.0 // indirect

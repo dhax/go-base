@@ -6,11 +6,17 @@ import (
 	"github.com/lestrrat-go/jwx/jwt"
 )
 
+type CommonClaims struct {
+	ExpiresAt int64 `json:"exp,omitempty"`
+	IssuedAt  int64 `json:"iat,omitempty"`
+}
+
 // AppClaims represent the claims parsed from JWT access token.
 type AppClaims struct {
 	ID    int      `json:"id,omitempty"`
 	Sub   string   `json:"sub,omitempty"`
 	Roles []string `json:"roles,omitempty"`
+	CommonClaims
 }
 
 // ParseClaims parses JWT claims into AppClaims.
@@ -47,6 +53,7 @@ func (c *AppClaims) ParseClaims(claims map[string]interface{}) error {
 type RefreshClaims struct {
 	ID    int    `json:"id,omitempty"`
 	Token string `json:"token,omitempty"`
+	CommonClaims
 }
 
 // ParseClaims parses the JWT claims into RefreshClaims.

@@ -1,13 +1,12 @@
 package jwt
 
 import (
-	"context"
 	"crypto/rand"
+	"encoding/json"
 	"net/http"
 	"time"
 
 	"github.com/go-chi/jwtauth/v5"
-	"github.com/lestrrat-go/jwx/jwt"
 	"github.com/spf13/viper"
 )
 
@@ -54,35 +53,40 @@ func (a *TokenAuth) GenTokenPair(accessClaims AppClaims, refreshClaims RefreshCl
 
 // CreateJWT returns an access token for provided account claims.
 func (a *TokenAuth) CreateJWT(c AppClaims) (string, error) {
-	token := jwt.New()
-	token.Set(jwt.IssuedAtKey, time.Now().Unix())
-	token.Set(jwt.ExpirationKey, time.Now().Add(a.JwtExpiry).Unix())
+	c.IssuedAt = time.Now().Unix()
+	c.ExpiresAt = time.Now().Add(a.JwtExpiry).Unix()
 
-	token.Set(jwt.SubjectKey, c.Sub)
-	token.Set(`id`, c.ID)
-	token.Set(`roles`, c.Roles)
-
-	tokenMap, err := token.AsMap(context.Background())
+	claims, err := ParseStructToMap(c)
 	if err != nil {
 		return "", err
 	}
-	_, tokenString, err := a.JwtAuth.Encode(tokenMap)
+
+	_, tokenString, err := a.JwtAuth.Encode(claims)
 	return tokenString, err
+}
+
+func ParseStructToMap(c interface{}) (map[string]interface{}, error) {
+	var claims map[string]interface{}
+	inrec, _ := json.Marshal(c)
+	err := json.Unmarshal(inrec, &claims)
+	if err != nil {
+		return nil, err
+	}
+
+	return claims, err
 }
 
 // CreateRefreshJWT returns a refresh token for provided token Claims.
 func (a *TokenAuth) CreateRefreshJWT(c RefreshClaims) (string, error) {
-	token := jwt.New()
-	token.Set(jwt.IssuedAtKey, time.Now().Unix())
-	token.Set(jwt.ExpirationKey, time.Now().Add(a.JwtRefreshExpiry).Unix())
+	c.IssuedAt = time.Now().Unix()
+	c.ExpiresAt = time.Now().Add(a.JwtRefreshExpiry).Unix()
 
-	token.Set(`token`, c.Token)
-
-	tokenMap, err := token.AsMap(context.Background())
+	claims, err := ParseStructToMap(c)
 	if err != nil {
 		return "", err
 	}
-	_, tokenString, err := a.JwtAuth.Encode(tokenMap)
+
+	_, tokenString, err := a.JwtAuth.Encode(claims)
 	return tokenString, err
 }
 

@@ -2,7 +2,6 @@ package pwdless
 
 import (
 	"bytes"
-	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -16,7 +15,6 @@ import (
 	"time"
 
 	"github.com/go-chi/chi/v5"
-	jwx_jwt "github.com/lestrrat-go/jwx/jwt"
 	"github.com/spf13/viper"
 
 	"github.com/dhax/go-base/auth/jwt"
@@ -247,6 +245,9 @@ func TestAuthResource_refresh(t *testing.T) {
 			// }
 			refreshJWT := genRefreshJWT(jwt.RefreshClaims{
 				Token: tc.token,
+				CommonClaims: jwt.CommonClaims{
+					ExpiresAt: time.Now().Add(time.Minute * tc.exp).UnixNano(),
+				},
 			})
 
 			res, body := testRequest(t, ts, "POST", "/refresh", nil, refreshJWT)
@@ -310,6 +311,9 @@ func TestAuthResource_logout(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			refreshJWT := genRefreshJWT(jwt.RefreshClaims{
 				Token: tc.token,
+				CommonClaims: jwt.CommonClaims{
+					ExpiresAt: time.Now().Add(time.Minute * tc.exp).UnixNano(),
+				},
 			})
 
 			res, body := testRequest(t, ts, "POST", "/logout", nil, refreshJWT)
@@ -355,29 +359,16 @@ func testRequest(t *testing.T, ts *httptest.Server, method, path string, body io
 }
 
 // func genJWT(c jwt.AppClaims) string {
-// 	token := jwx_jwt.New()
-// 	token.Set(jwx_jwt.IssuedAtKey, time.Now().Unix())
-// 	token.Set(jwx_jwt.ExpirationKey, time.Now().Add(time.Duration(time.Minute)).Unix())
-// 	tokenMap, err := token.AsMap(context.Background())
-// 	if err != nil {
-// 		return ""
-// 	}
-// 	_, tokenString, _ := auth.TokenAuth.JwtAuth.Encode(tokenMap)
+// 	claims, _ := jwt.ParseStructToMap(c)
+
+// 	_, tokenString, _ := auth.TokenAuth.JwtAuth.Encode(claims)
 // 	return tokenString
 // }
 
 func genRefreshJWT(c jwt.RefreshClaims) string {
-	token := jwx_jwt.New()
-	token.Set(jwx_jwt.IssuedAtKey, time.Now())
-	token.Set(jwx_jwt.ExpirationKey, time.Now().Add(time.Duration(time.Minute)))
+	claims, _ := jwt.ParseStructToMap(c)
 
-	token.Set(`token`, c.Token)
-
-	tokenMap, err := token.AsMap(context.Background())
-	if err != nil {
-		return ""
-	}
-	_, tokenString, _ := auth.TokenAuth.JwtAuth.Encode(tokenMap)
+	_, tokenString, _ := auth.TokenAuth.JwtAuth.Encode(claims)
 	return tokenString
 }
 

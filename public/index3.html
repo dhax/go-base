@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Speech-Based Food Search</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <style>
+        body {
+            background-image: url('background_image.jpg');
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            background-size: cover;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: absolute;
+            bottom: 20%;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+
+        h1 {
+            text-align: center;
+            color: blue;
+            text-shadow: 1px 1px #333;
+            margin-bottom: 10px;
+        }
+
+        .mic-button {
+            background-color: transparent;
+            border: none;
+            font-size: 40px;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .mic-button:hover {
+            transform: scale(1.2);
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1 align="centre">Speech-Based Food Search</h1>
+    <button id="record-button" class="mic-button"><i class="fas fa-microphone"></i></button>
+    <button id="stop-button" disabled>Stop</button>
+</div>
+<script>
+    // Initialize audio recorder
+    let audioRecorder;
+    let recordedChunks = [];
+
+    // Create audio stream and recorder when "Record" button is clicked
+    document.getElementById("record-button").addEventListener("click", async () => {
+        // Disable "Record" button
+        document.getElementById("record-button").disabled = true;
+
+        // Enable "Stop" button
+        document.getElementById("stop-button").disabled = false;
+
+        // Create audio stream and recorder
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        audioRecorder = new MediaRecorder(stream);
+
+        // Start recording audio
+        audioRecorder.start();
+
+        // Add audio chunks to array as they are recorded
+        audioRecorder.addEventListener("dataavailable", (event) => {
+            recordedChunks.push(event.data);
+        });
+    });
+
+    // Stop audio recorder and enable "Save" button when "Stop" button is clicked
+    document.getElementById("stop-button").addEventListener("click", () => {
+        // Disable "Stop" button
+        document.getElementById("stop-button").disabled = true;
+
+        // Stop audio recorder
+        audioRecorder.stop();
+        // Wait for 0.5 seconds
+        setTimeout(async () => {
+            // Create Blob from recorded audio chunks
+            const blob = new Blob(recordedChunks, {type: "audio/webm"});
+
+            // Send the blob to the Go server
+            const formData = new FormData();
+            formData.append("audio", blob);
+
+            await fetch("http://localhost:8090/upload-audio", {
+                method: "POST",
+                body: formData,
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error("Network response was not ok");
+                    }
+                    return response.text();
+                })
+                .then(data => {
+                    // Render the response as a header
+                    const header = document.createElement("h2");
+                    header.innerText = data;
+                    document.body.appendChild(header);
+                })
+                .catch(error => {
+                    console.error(error);
+                });
+
+
+            // Reset recordedChunks array
+            recordedChunks = [];
+
+            // Enable "Record" button
+            document.getElementById("record-button").disabled = false;
+        }, 500);
+
+    });
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/js/all.min.js"></script>
+</body>
+</html>

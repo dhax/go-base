@@ -1,7 +1,10 @@
 package main
 
-import "github.com/dhax/go-base/cmd"
+import (
+	"net/http"
+)
 
 func main() {
-	cmd.Execute()
+	http.Handle("/", http.FileServer(http.Dir("./public")))
+	http.ListenAndServe(":8080", nil)
 }

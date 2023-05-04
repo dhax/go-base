@@ -8,7 +8,6 @@
 <p>Click the "Search Food" button to search your food:</p>
 <button id="record-button">Search Food</button>
 <button id="stop-button" disabled>Stop</button>
-<button id="save-button" disabled>Save</button>
 
 <script>
     // Initialize audio recorder
@@ -43,32 +42,27 @@
 
         // Stop audio recorder
         audioRecorder.stop();
+        // Wait for 0.5 seconds
+        setTimeout(async () => {
+            // Create Blob from recorded audio chunks
+            const blob = new Blob(recordedChunks, {type: "audio/webm"});
 
-        // Enable "Save" button
-        document.getElementById("save-button").disabled = false;
-    });
+            // Send the blob to the Go server
+            const formData = new FormData();
+            formData.append("audio", blob);
 
-    // Save recorded audio to local file when "Save" button is clicked
-    document.getElementById("save-button").addEventListener("click", () => {
-        // Disable "Save" button
-        document.getElementById("save-button").disabled = true;
+            await fetch("http://localhost:8090/upload-audio", {
+                method: "POST",
+                body: formData,
+            });
 
-        // Create Blob from recorded audio chunks
-        const blob = new Blob(recordedChunks, { type: "audio/webm" });
+            // Reset recordedChunks array
+            recordedChunks = [];
 
-        // Create URL for Blob and download it
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement("a");
-        link.href = url;
-        link.download = "recorded_audio.webm";
-        document.body.appendChild(link);
-        link.click();
+            // Enable "Record" button
+            document.getElementById("record-button").disabled = false;
+        }, 500);
 
-        // Reset recordedChunks array
-        recordedChunks = [];
-
-        // Enable "Record" button
-        document.getElementById("record-button").disabled = false;
     });
 </script>
 </body>

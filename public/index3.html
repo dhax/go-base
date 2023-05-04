@@ -16,15 +16,27 @@
             flex-direction: column;
             align-items: center;
             position: absolute;
-            bottom: 20%;
+            bottom: 10%;
             left: 50%;
             transform: translateX(-50%);
         }
 
+        .response-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 16px;
+            color: white;
+            text-shadow: 1px 1px #333;
+            position: relative;
+            top: calc(50% + 20px);
+            left: 50%;
+            transform: translateX(-50%);
+        }
 
         h1 {
             text-align: center;
-            color: blue;
+            color: white;
             text-shadow: 1px 1px #333;
             margin-bottom: 10px;
         }
@@ -46,7 +58,8 @@
 <div class="container">
     <h1 align="centre">Speech-Based Food Search</h1>
     <button id="record-button" class="mic-button"><i class="fas fa-microphone"></i></button>
-    <button id="stop-button" disabled>Stop</button>
+    <button id="stop-button" disabled>Search</button>
+    <div id="response-container" class="response-container"></div>
 </div>
 <script>
     // Initialize audio recorder
@@ -82,7 +95,7 @@
         // Stop audio recorder
         audioRecorder.stop();
         // Wait for 0.5 seconds
-        setTimeout(async () => {
+        setTimeout( () => {
             // Create Blob from recorded audio chunks
             const blob = new Blob(recordedChunks, {type: "audio/webm"});
 
@@ -90,7 +103,7 @@
             const formData = new FormData();
             formData.append("audio", blob);
 
-            await fetch("http://localhost:8090/upload-audio", {
+            fetch("http://localhost:8090/upload-audio", {
                 method: "POST",
                 body: formData,
             })
@@ -98,13 +111,54 @@
                     if (!response.ok) {
                         throw new Error("Network response was not ok");
                     }
-                    return response.text();
+                    return response.json();
                 })
                 .then(data => {
-                    // Render the response as a header
-                    const header = document.createElement("h2");
-                    header.innerText = data;
-                    document.body.appendChild(header);
+                    // // Render the response as a header
+                    // const header = document.createElement("h2");
+                    // header.innerText = data.text;
+                    //
+                    // // Create container div for response text
+                    // const responseContainer = document.createElement("div");
+                    // responseContainer.classList.add("response-container");
+                    // responseContainer.appendChild(header);
+                    //
+                    // // Append the response container below the stop button
+                    // const stopButton = document.getElementById("stop-button");
+                    // stopButton.parentNode.insertBefore(responseContainer, stopButton.nextSibling);
+                    const restaurantNames = [
+                        'The Hungry Hippo',
+                        'Tasty Tacos',
+                        'Pizza Palace',
+                        'Burger Bistro',
+                        'Noodle Nook',
+                        'Sushi Shack',
+                        'Waffle Wonderland',
+                        'The Grill House',
+                        'Seafood Station',
+                        'Pancake Paradise',
+                        'Taco Town',
+                        'Ramen Room',
+                        'Curry Corner',
+                        'Sandwich Spot',
+                        'Sizzling Steakhouse',
+                        'Thai Terrace',
+                        'Burrito Barn',
+                        'Kebab Kingdom',
+                        'Falafel Factory',
+                        'Chicken Coop'
+                    ];
+                    let question = data.text
+                    for (var i = 0; i < data.data.length; i++) {
+                        let randomIndex = Math.floor(Math.random() * restaurantNames.length);
+                        let restaurant = restaurantNames[randomIndex];
+                        let name = data.data[i].Name;
+                        let description = data.data[i].Description;
+                        let price = data.data[i].Price;
+
+                        alert(`Question: ${question}\nName: ${name}\nDescription: ${description}\nPrice: ${price}\nRestaurant: ${restaurant}`);
+                    }
+
                 })
                 .catch(error => {
                     console.error(error);

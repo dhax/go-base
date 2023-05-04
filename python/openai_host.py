@@ -5,6 +5,7 @@ from openai.embeddings_utils import get_embedding, cosine_similarity
 import openai
 openai.api_key = ""
 import gradio as gr
+import re
 
 # search through the reviews for a specific product
 
@@ -21,6 +22,8 @@ def func_create_json(menu_item):
     for key_value in key_values:
         key = (key_value.split(":")[0]).strip()
         value = (" ".join(key_value.split(":")[1:])).strip()
+        if(key == "Description" or key=="Allergies"):
+            value = re.sub(r'[^\w\s]+', '', value)
         j[key] = value
     return j
 
@@ -42,9 +45,9 @@ def suggest_menu_items(product_description, n=5, pprint=True):
         for r in results:
             print(r[:200])
             print()
-    menu_items = ""
+    menu_items = []
     for r in results['menu_item']:
-        menu_items += str(func_create_json(r)) + "\n"
+        menu_items.append(func_create_json(r))
     
     return menu_items
 

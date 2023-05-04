@@ -1,14 +1,30 @@
 package main
 
 import (
+	"bytes"
 	"context"
+	"encoding/json"
 	"fmt"
 	"github.com/sashabaranov/go-openai"
 	"io/ioutil"
 	"net/http"
 	"os"
 	"path/filepath"
+	"strings"
 )
+
+type Data struct {
+	ID          string `json:"Id"`
+	Name        string `json:"Name"`
+	Description string `json:"Description"`
+	Price       string `json:"Price"`
+	Allergies   string `json:"Allergies"`
+}
+
+type WhisperResponse struct {
+	Text string `json:"text"`
+	Data []Data `json:"data"`
+}
 
 func main() {
 	http.HandleFunc("/upload-audio", handleUploadAudio)
@@ -16,6 +32,10 @@ func main() {
 }
 
 func handleUploadAudio(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
+	w.Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
+
 	if r.Method != "POST" {
 		w.WriteHeader(http.StatusMethodNotAllowed)
 		return
@@ -79,6 +99,84 @@ func handleUploadAudio(w http.ResponseWriter, r *http.Request) {
 	fmt.Println(resp.Text)
 
 	// call GPT for suggestion
+	// Define the URL and payload
+	url := "http://127.0.0.1:7860/run/predict"
+	payload := map[string]interface{}{
+		"data": []string{resp.Text},
+	}
+
+	// Convert the payload to JSON format
+	payloadBytes, err := json.Marshal(payload)
+	if err != nil {
+		panic(err)
+	}
+
+	// Create a new HTTP POST request
+	request, err := http.NewRequest("POST", url, bytes.NewBuffer(payloadBytes))
+	if err != nil {
+		panic(err)
+	}
+
+	// Set the content type header
+	request.Header.Set("Content-Type", "application/json")
+
+	// Send the request and get the response
+	client := &http.Client{}
+	response, err := client.Do(request)
+	if err != nil {
+		panic(err)
+	}
+
+	// Read the response body
+	defer response.Body.Close()
+	var result map[string]interface{}
+	err = json.NewDecoder(response.Body).Decode(&result)
+	if err != nil {
+		panic(err)
+	}
+
+	// Print the response
+	//fmt.Println(result["data"])
 	// it will return some output
-	fmt.Fprintf(w, "%s", resp.Text)
+	//fmt.Println("result-> ", result)
+	var datas []Data
+	for _, v := range result["data"].([]interface{}) {
+		str := v.(string)
+		str = strings.ReplaceAll(str, "'", "\"")
+		//str, _ = strconv.Unquote(str)
+		fmt.Println("str-> ", str)
+		//fmt.Println("str->", str[1])
+		err = json.Unmarshal([]byte(str), &datas)
+		if err != nil {
+			fmt.Println(err)
+		}
+		//fmt.Println("datas-> ", datas)
+	}
+
+	//var war WhisperApiResponse
+	//as := result["data"].([]string)
+	//b, _ := io.ReadAll(response.Body)
+	//fmt.Println(string(b))
+	//b, _ := fmt.Fprintf(result["data"][0])
+	//fmt.Println(as[0])
+
+	fresp := WhisperResponse{
+		Text: resp.Text,
+		Data: datas,
+	}
+	// Serialize the response as JSON
+	jsonResponse, err := json.Marshal(fresp)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	fmt.Println(fresp)
+	// Set the Content-Type header to indicate that the response is in JSON format
+	w.Header().Set("Content-Type", "application/json")
+
+	// Write the JSON response to the HTTP response body
+	_, err = w.Write(jsonResponse)
+	if err != nil {
+		return
+	}
 }

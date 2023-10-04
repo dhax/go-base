@@ -3,7 +3,7 @@ package jwt
 import (
 	"errors"
 
-	"github.com/lestrrat-go/jwx/jwt"
+	"github.com/lestrrat-go/jwx/v2/jwt"
 )
 
 type CommonClaims struct {

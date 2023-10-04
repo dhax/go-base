@@ -2,8 +2,8 @@ package cmd
 
 import (
 	"fmt"
-	"io/ioutil"
 	"log"
+	"os"
 
 	"github.com/dhax/go-base/api"
 	"github.com/go-chi/docgen"
@@ -53,7 +53,7 @@ func genRoutesDoc() {
 		ProjectPath: "github.com/dhax/go-base",
 		Intro:       "GoBase REST API.",
 	})
-	if err := ioutil.WriteFile("routes.md", []byte(md), 0644); err != nil {
+	if err := os.WriteFile("routes.md", []byte(md), 0644); err != nil {
 		log.Println(err)
 		return
 	}

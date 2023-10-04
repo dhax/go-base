@@ -23,13 +23,20 @@ The following feature set is a minimal selection of typical Web API requirements
 
 ## Start Application
 
-- Clone this repository
-- Create a postgres database and set environment variables for your database accordingly if not using same as default
+- Clone and change into this repository
+
+### Local
+
+- Create a postgres database and set environment variables for your database accordingly if not using below defaults
 - Run the application to see available commands: `go run main.go`
-- First initialize the database running all migrations found in ./database/migrate at once with command _migrate_: `go run main.go migrate`
+- Run all migrations from database/migrate folder: `go run main.go migrate`
 - Run the application with command _serve_: `go run main.go serve`
 
-Or just use the provided docker-compose file. After first start attach to the server container and run `./main migrate` to populate the database.
+### Using Docker Compose
+
+- First start the database only: `docker compose up -d postgres`
+- Once initialize the database by running all migrations in database/migrate folder: `docker compose exec server ./main migrate`
+- Start the api server: `docker compose up server`
 
 ## API Routes
 
@@ -69,6 +76,10 @@ Use one of the following bootstrapped users for login:
 
 A deployed version can also be found on [Heroku](https://govue.herokuapp.com)
 
+### Testing
+
+Package auth/pwdless contains example api tests using a mocked database. Run them with: `go test -v ./...`
+
 ### Environment Variables
 
 By default viper will look at $HOME/.go-base.yaml for a config file. Setting your config as Environment Variables is recommended as by 12-Factor App.
@@ -96,10 +107,6 @@ By default viper will look at $HOME/.go-base.yaml for a config file. Setting you
 | EMAIL_FROM_ADDRESS      | string        |                             | from address used in sending emails                                                                                                                                                                       |
 | EMAIL_FROM_NAME         | string        |                             | from name used in sending emails                                                                                                                                                                          |
 | ENABLE_CORS             | bool          | false                       | enable CORS requests                                                                                                                                                                                      |
-
-### Testing
-
-Package auth/pwdless contains example api tests using a mocked database.
 
 [godoc]: https://godoc.org/github.com/dhax/go-base
 [godoc badge]: https://godoc.org/github.com/dhax/go-base?status.svg

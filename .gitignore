@@ -3,6 +3,10 @@
 .realize.yaml
 .idea
 
+.env
+.env.*
+!.env.example
+
 debug
 go-base
 

@@ -4,19 +4,20 @@ defaults:
     shell: bash
 
 jobs:
-  build:
+  deploy:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+      
       - name: Go and dependencies
         uses: ./.github/actions/setup-go-and-deps
-      - name: build
-        run: CGO_ENABLED=0 go build -o main .
 
-      - name: archive
-        run: tar -czvf main.tar.gz main
-      - name: upload
-        uses: actions/upload-artifact@v4
+      - name: download builded artifact
+        uses: actions/download-artifact@v2
         with:
           name: main
+      
+      - name: Deploy
+        run: |
+          echo "Dummy Deploy..."

@@ -31,4 +31,4 @@ jobs:
     uses: ./.github/workflows/build.yml
   deploy:
     needs: build
-    uses: ./.github/workflows/deploy.yml
+    uses: ./.github/workflows/deployment.yml

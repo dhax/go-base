@@ -7,7 +7,9 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - name: build
-        run: |
-          echo "Running build script"
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Go and dependencies
+        uses: ./.github/actions/setup-go-and-deps
+      - name: test
+        run: CGO_ENABLED=0 go build -o main .

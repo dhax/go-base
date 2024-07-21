@@ -5,4 +5,10 @@ defaults:
 
 jobs:
   deps:
-    uses: ./.github/reusable_workflows/setup-go-and-deps.yml
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Go and dependencies
+        uses: ./.github/actions/setup-go-and-deps

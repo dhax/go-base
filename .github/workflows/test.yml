@@ -7,8 +7,9 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
       - name: Go and dependencies
-        uses: ./.github/reusable_workflows/setup-go-and-deps.yml
+        uses: ./.github/actions/setup-go-and-deps
       - name: test
         run: go test -v ./...

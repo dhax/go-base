@@ -1,0 +1,22 @@
+name: Setup Go and Dependencies
+description: 'Setup Go and Dependencies'
+
+inputs:
+  go-version-file:
+    description: 'The path to the go.mod file'
+    required: false
+    default: 'go.mod'
+
+runs:
+  using: "composite"
+  steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    - name: Setup Go
+      uses: actions/setup-go@v5
+      with:
+        go-version-file: ${{ inputs.go-version-file }}
+
+    - name: Install Dependencies
+      shell: bash
+      run: go mod tidy

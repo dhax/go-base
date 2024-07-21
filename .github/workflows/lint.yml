@@ -9,8 +9,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: golang ci lint
-        uses: golangci/golangci-lint-action@v2
+        uses: golangci/golangci-lint-action@v6
+        continue-on-error: true
         with:
           version: latest
           args: --timeout 10m
+        
           

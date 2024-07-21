@@ -1,0 +1,25 @@
+run-name: lint
+on: 
+  push:
+    branches:
+      - main
+      - master
+      - develop
+  pull_request:
+    branches:
+      - main
+      - master
+      - develop
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    needs: pre
+    steps:
+      - uses: actions/checkout@v4
+      - name: lint script
+        run: |
+          echo "Running lint script"

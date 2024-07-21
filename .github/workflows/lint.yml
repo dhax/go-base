@@ -8,6 +8,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: lint script
-        run: |
-          echo "Running lint script"
+      - name: golang ci lint
+        uses: golangci/golangci-lint-action@v2
+        with:
+          version: latest
+          args: --timeout 10m
+          

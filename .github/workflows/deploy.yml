@@ -8,6 +8,5 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: deploy script
-        run: |
-          echo "Running deploy script"
+      - name: Go and dependencies
+        uses: ./.github/reusable_workflows/setup-go-and-deps.yml

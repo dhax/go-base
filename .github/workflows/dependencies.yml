@@ -5,9 +5,4 @@ defaults:
 
 jobs:
   deps:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: deps
-        run: |
-          echo "Running deps script"
+    uses: ./.github/reusable_workflows/setup-go-and-deps.yml

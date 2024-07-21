@@ -14,9 +14,8 @@ jobs:
       - name: build
         run: CGO_ENABLED=0 go build -o main .
 
-      - name: archive
-        run: tar -czvf main.tar.gz main
-      - name: upload
+      - name: upload builded artifact
         uses: actions/upload-artifact@v4
         with:
-          name: main
+          name: main-${{github.sha}}
+          path: main

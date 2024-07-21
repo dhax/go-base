@@ -1,15 +1,4 @@
-run-name: lint
-on: 
-  push:
-    branches:
-      - main
-      - master
-      - develop
-  pull_request:
-    branches:
-      - main
-      - master
-      - develop
+on: [workflow_call]
 defaults:
   run:
     shell: bash
@@ -17,7 +6,6 @@ defaults:
 jobs:
   lint:
     runs-on: ubuntu-latest
-    needs: pre
     steps:
       - uses: actions/checkout@v4
       - name: lint script

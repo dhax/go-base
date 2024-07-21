@@ -1,15 +1,4 @@
-run-name: .pre
-on: 
-  push:
-    branches:
-      - main
-      - master
-      - develop
-  pull_request:
-    branches:
-      - main
-      - master
-      - develop
+on: [workflow_call]
 
 defaults:
   run:

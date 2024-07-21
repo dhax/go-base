@@ -17,6 +17,18 @@ defaults:
 jobs:
   pre: 
     uses: ./.github/workflows/pre.yml
-  lint:
+  deps: 
     needs: pre
+    uses: ./.github/workflows/dependencies.yml
+  lint:
+    needs: deps
     uses: ./.github/workflows/lint.yml
+  test:
+    needs: deps
+    uses: ./.github/workflows/test.yml
+  build:
+    needs: [test, lint]
+    uses: ./.github/workflows/build.yml
+  deploy:
+    needs: build
+    uses: ./.github/workflows/deploy.yml

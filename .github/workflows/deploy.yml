@@ -1,0 +1,13 @@
+on: [workflow_call]
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: deploy script
+        run: |
+          echo "Running deploy script"

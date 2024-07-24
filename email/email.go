@@ -48,7 +48,7 @@ func NewMailer() (*Mailer, error) {
 	}
 
 	s := &Mailer{
-		client: mail.NewPlainDialer(smtp.Host, smtp.Port, smtp.User, smtp.Password),
+		client: mail.NewDialer(smtp.Host, smtp.Port, smtp.User, smtp.Password),
 		from:   NewEmail(viper.GetString("email_from_name"), viper.GetString("email_from_address")),
 	}
 
@@ -157,7 +157,7 @@ func formatAsDate(t time.Time) string {
 }
 
 func formatAsDuration(t time.Time) string {
-	dur := t.Sub(time.Now())
+	dur := time.Until(t)
 	hours := int(dur.Hours())
 	mins := int(dur.Minutes())
 

@@ -52,7 +52,7 @@ func (srv *Server) Start() {
 	}()
 	log.Printf("Listening on %s\n", srv.Addr)
 
-	quit := make(chan os.Signal)
+	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, os.Interrupt)
 	sig := <-quit
 	log.Println("Shutting down server... Reason:", sig)

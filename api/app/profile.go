@@ -89,9 +89,9 @@ func (rs *ProfileResource) update(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := rs.Store.Update(p); err != nil {
-		switch err.(type) {
+		switch err := err.(type) {
 		case validation.Errors:
-			render.Render(w, r, ErrValidation(ErrProfileValidation, err.(validation.Errors)))
+			render.Render(w, r, ErrValidation(ErrProfileValidation, err))
 			return
 		}
 		render.Render(w, r, ErrRender(err))

@@ -122,9 +122,9 @@ func (rs *AccountResource) create(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := rs.Store.Create(data.Account); err != nil {
-		switch err.(type) {
+		switch err := err.(type) {
 		case validation.Errors:
-			render.Render(w, r, ErrValidation(ErrAccountValidation, err.(validation.Errors)))
+			render.Render(w, r, ErrValidation(ErrAccountValidation, err))
 			return
 		}
 		render.Render(w, r, ErrInvalidRequest(err))
@@ -147,9 +147,9 @@ func (rs *AccountResource) update(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := rs.Store.Update(acc); err != nil {
-		switch err.(type) {
+		switch err := err.(type) {
 		case validation.Errors:
-			render.Render(w, r, ErrValidation(ErrAccountValidation, err.(validation.Errors)))
+			render.Render(w, r, ErrValidation(ErrAccountValidation, err))
 			return
 		}
 		render.Render(w, r, ErrInvalidRequest(err))

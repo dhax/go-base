@@ -1,0 +1,21 @@
+on: [workflow_call]
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Go and dependencies
+        uses: ./.github/actions/setup-go-and-deps
+      - name: build
+        run: CGO_ENABLED=0 go build -o main .
+
+      - name: upload builded artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: main-${{github.sha}}
+          path: main

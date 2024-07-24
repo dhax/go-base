@@ -1,0 +1,17 @@
+on: [workflow_call]
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: download builded artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: main-${{github.sha}}
+      
+      - name: Deploy
+        run: |
+          echo "Dummy Deploy..."

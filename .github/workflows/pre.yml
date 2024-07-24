@@ -1,0 +1,14 @@
+on: [workflow_call]
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  pre:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: pre script
+        run: |
+          echo "Running pre script" 

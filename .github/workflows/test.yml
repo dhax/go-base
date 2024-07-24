@@ -1,0 +1,15 @@
+on: [workflow_call]
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Go and dependencies
+        uses: ./.github/actions/setup-go-and-deps
+      - name: test
+        run: go test -v ./...

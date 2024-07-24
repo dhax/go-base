@@ -1,0 +1,34 @@
+run-name: main workflow
+on: 
+  push:
+    branches:
+      - main
+      - master
+      - develop
+  pull_request:
+    branches:
+      - main
+      - master
+      - develop
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  pre: 
+    uses: ./.github/workflows/pre.yml
+  deps: 
+    needs: pre
+    uses: ./.github/workflows/dependencies.yml
+  lint:
+    needs: deps
+    uses: ./.github/workflows/lint.yml
+  test:
+    needs: deps
+    uses: ./.github/workflows/test.yml
+  build:
+    needs: [test, lint]
+    uses: ./.github/workflows/build.yml
+  deploy:
+    needs: build
+    uses: ./.github/workflows/deployment.yml

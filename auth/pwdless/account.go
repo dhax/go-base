@@ -6,28 +6,28 @@ import (
 
 	validation "github.com/go-ozzo/ozzo-validation"
 	"github.com/go-ozzo/ozzo-validation/is"
-	"github.com/go-pg/pg/orm"
+	"github.com/uptrace/bun"
 
 	"github.com/dhax/go-base/auth/jwt"
 )
 
 // Account represents an authenticated application user
 type Account struct {
-	ID        int       `json:"id"`
-	CreatedAt time.Time `json:"created_at,omitempty"`
-	UpdatedAt time.Time `json:"updated_at,omitempty"`
-	LastLogin time.Time `json:"last_login,omitempty"`
+	ID        int       `bun:"id,pk,autoincrement" json:"id"`
+	CreatedAt time.Time `bun:"created_at,nullzero,notnull,default:current_timestamp" json:"created_at,omitempty"`
+	UpdatedAt time.Time `bun:"updated_at,nullzero,notnull,default:current_timestamp" json:"updated_at,omitempty"`
+	LastLogin time.Time `bun:"last_login" json:"last_login,omitempty"`
 
-	Email  string   `json:"email"`
-	Name   string   `json:"name"`
-	Active bool     `sql:",notnull" json:"active"`
-	Roles  []string `pg:",array" json:"roles,omitempty"`
+	Email  string   `bun:"email,notnull" json:"email"`
+	Name   string   `bun:"name,notnull" json:"name"`
+	Active bool     `bun:"active,notnull" json:"active"`
+	Roles  []string `bun:"roles,array" json:"roles,omitempty"`
 
-	Token []jwt.Token `json:"token,omitempty"`
+	Token []jwt.Token `bun:"rel:has-many" json:"token,omitempty"`
 }
 
 // BeforeInsert hook executed before database insert operation.
-func (a *Account) BeforeInsert(db orm.DB) error {
+func (a *Account) BeforeInsert(db *bun.DB) error {
 	now := time.Now()
 	if a.CreatedAt.IsZero() {
 		a.CreatedAt = now
@@ -37,13 +37,13 @@ func (a *Account) BeforeInsert(db orm.DB) error {
 }
 
 // BeforeUpdate hook executed before database update operation.
-func (a *Account) BeforeUpdate(db orm.DB) error {
+func (a *Account) BeforeUpdate(db *bun.DB) error {
 	a.UpdatedAt = time.Now()
 	return a.Validate()
 }
 
 // BeforeDelete hook executed before database delete operation.
-func (a *Account) BeforeDelete(db orm.DB) error {
+func (a *Account) BeforeDelete(db *bun.DB) error {
 	return nil
 }
 

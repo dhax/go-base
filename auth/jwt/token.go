@@ -3,24 +3,24 @@ package jwt
 import (
 	"time"
 
-	"github.com/go-pg/pg/orm"
+	"github.com/uptrace/bun"
 )
 
 // Token holds refresh jwt information.
 type Token struct {
-	ID        int       `json:"id,omitempty"`
-	CreatedAt time.Time `json:"created_at,omitempty"`
-	UpdatedAt time.Time `json:"updated_at,omitempty"`
-	AccountID int       `json:"-"`
+	ID        int       `bun:"id,pk,autoincrement" json:"id,omitempty"`
+	CreatedAt time.Time `bun:"created_at,nullzero,notnull,default:current_timestamp" json:"created_at,omitempty"`
+	UpdatedAt time.Time `bun:"updated_at,nullzero,notnull,default:current_timestamp" json:"updated_at,omitempty"`
+	AccountID int       `bun:"account_id,notnull" json:"-"`
 
-	Token      string    `json:"-"`
-	Expiry     time.Time `json:"-"`
-	Mobile     bool      `sql:",notnull" json:"mobile"`
-	Identifier string    `json:"identifier,omitempty"`
+	Token      string    `bun:"token,notnull" json:"-"`
+	Expiry     time.Time `bun:"expiry,notnull" json:"-"`
+	Mobile     bool      `bun:"mobile,notnull" json:"mobile"`
+	Identifier string    `bun:"identifier" json:"identifier,omitempty"`
 }
 
 // BeforeInsert hook executed before database insert operation.
-func (t *Token) BeforeInsert(db orm.DB) error {
+func (t *Token) BeforeInsert(db *bun.DB) error {
 	now := time.Now()
 	if t.CreatedAt.IsZero() {
 		t.CreatedAt = now
@@ -30,7 +30,7 @@ func (t *Token) BeforeInsert(db orm.DB) error {
 }
 
 // BeforeUpdate hook executed before database update operation.
-func (t *Token) BeforeUpdate(db orm.DB) error {
+func (t *Token) BeforeUpdate(db *bun.DB) error {
 	t.UpdatedAt = time.Now()
 	return nil
 }

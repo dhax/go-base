@@ -1,9 +1,10 @@
-package migrate
+package migrations
 
 import (
+	"context"
 	"fmt"
 
-	"github.com/go-pg/migrations"
+	"github.com/uptrace/bun"
 )
 
 const accountTable = `
@@ -43,7 +44,7 @@ func init() {
 		`DROP TABLE accounts`,
 	}
 
-	migrations.Register(func(db migrations.DB) error {
+	Migrations.MustRegister(func(ctx context.Context, db *bun.DB) error {
 		fmt.Println("creating initial tables")
 		for _, q := range up {
 			_, err := db.Exec(q)
@@ -52,7 +53,7 @@ func init() {
 			}
 		}
 		return nil
-	}, func(db migrations.DB) error {
+	}, func(ctx context.Context, db *bun.DB) error {
 		fmt.Println("dropping initial tables")
 		for _, q := range down {
 			_, err := db.Exec(q)

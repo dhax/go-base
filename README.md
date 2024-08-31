@@ -14,7 +14,7 @@ The following feature set is a minimal selection of typical Web API requirements
 
 - Configuration using [viper](https://github.com/spf13/viper)
 - CLI features using [cobra](https://github.com/spf13/cobra)
-- PostgreSQL support including migrations using [go-pg](https://github.com/go-pg/pg)
+- PostgreSQL support including migrations using [bun](https://github.com/uptrace/bun)
 - Structured logging with [Logrus](https://github.com/sirupsen/logrus)
 - Routing with [chi router](https://github.com/go-chi/chi) and middleware
 - JWT Authentication using [lestrrat-go/jwx](https://github.com/lestrrat-go/jwx) with example passwordless email authentication
@@ -35,8 +35,8 @@ The following feature set is a minimal selection of typical Web API requirements
 ### Using Docker Compose
 
 - First start the database only: `docker compose up -d postgres`
-- Once initialize the database by running all migrations in database/migrate folder: `docker compose exec server ./main migrate`
-- Start the api server: `docker compose up server`
+- Once initialize the database by running all migrations in database/migrate folder: `docker compose run server ./main migrate`
+- Start the api server: `docker compose up`
 
 ## API Routes
 
@@ -53,7 +53,7 @@ For passwordless login following routes are available:
 
 ### Example API
 
-Besides /auth/_ the API provides two main routes /api/_ and /admin/\*, as an example to separate application and administration context. The latter requires to be logged in as administrator by providing the respective JWT in Authorization Header.
+Besides /auth/_the API provides two main routes /api/_ and /admin/\*, as an example to separate application and administration context. The latter requires to be logged in as administrator by providing the respective JWT in Authorization Header.
 
 Check [routes.md](routes.md) for a generated overview of the provided API routes.
 
@@ -71,9 +71,10 @@ Outgoing emails containing the login token will be print to stdout if no valid e
 
 Use one of the following bootstrapped users for login:
 
-- admin@boot.io (has access to admin panel)
-- user@boot.io
+- <admin@example.com> (has access to admin panel)
+- <user@example.com>
 
+TODO: deploy somewhere else...
 A deployed version can also be found on [Heroku](https://govue.herokuapp.com)
 
 ### Testing
@@ -94,7 +95,7 @@ By default viper will look at $HOME/.go-base.yaml for a config file. Setting you
 | DB_USER                 | string        | postgres                    | database user name                                                                                                                                                                                        |
 | DB_PASSWORD             | string        | postgres                    | database user password                                                                                                                                                                                    |
 | DB_DATABASE             | string        | postgres                    | database shema name                                                                                                                                                                                       |
-| AUTH_LOGIN_URL          | string        | http://localhost:3000/login | client login url as sent in login token email                                                                                                                                                             |
+| AUTH_LOGIN_URL          | string        | <http://localhost:3000/login> | client login url as sent in login token email                                                                                                                                                             |
 | AUTH_LOGIN_TOKEN_LENGTH | int           | 8                           | length of login token                                                                                                                                                                                     |
 | AUTH_LOGIN_TOKEN_EXPIRY | time.Duration | 11m                         | login token expiry                                                                                                                                                                                        |
 | AUTH_JWT_SECRET         | string        | random                      | jwt sign and verify key - value "random" creates random 32 char secret at startup (and automatically invalidates existing tokens on app restarts, so during dev you might want to set a fixed value here) |

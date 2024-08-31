@@ -82,8 +82,7 @@ func New(enableCORS bool) (*chi.Mux, error) {
 		w.Write([]byte("pong"))
 	})
 
-	client := "./public"
-	r.Get("/*", SPAHandler(client))
+	r.Get("/*", SPAHandler("public"))
 
 	return r, nil
 }

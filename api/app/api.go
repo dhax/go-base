@@ -5,8 +5,8 @@ import (
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
-	"github.com/go-pg/pg"
 	"github.com/sirupsen/logrus"
+	"github.com/uptrace/bun"
 
 	"github.com/dhax/go-base/database"
 	"github.com/dhax/go-base/logging"
@@ -26,7 +26,7 @@ type API struct {
 }
 
 // NewAPI configures and returns application API.
-func NewAPI(db *pg.DB) (*API, error) {
+func NewAPI(db *bun.DB) (*API, error) {
 	accountStore := database.NewAccountStore(db)
 	account := NewAccountResource(accountStore)
 

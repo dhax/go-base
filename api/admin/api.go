@@ -5,9 +5,9 @@ import (
 	"net/http"
 
 	"github.com/sirupsen/logrus"
+	"github.com/uptrace/bun"
 
 	"github.com/go-chi/chi/v5"
-	"github.com/go-pg/pg"
 
 	"github.com/dhax/go-base/auth/authorize"
 	"github.com/dhax/go-base/database"
@@ -30,8 +30,7 @@ type API struct {
 }
 
 // NewAPI configures and returns admin application API.
-func NewAPI(db *pg.DB) (*API, error) {
-
+func NewAPI(db *bun.DB) (*API, error) {
 	accountStore := database.NewAdmAccountStore(db)
 	accounts := NewAccountResource(accountStore)
 

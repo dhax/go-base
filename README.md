@@ -61,7 +61,7 @@ Check [routes.md](routes.md) for a generated overview of the provided API routes
 
 The server is configured to serve a Progressive Web App (PWA) client from _./public_ folder (this repo only serves an example index.html, see below for a demo PWA client to put here). In this case enabling CORS is not required, because the client is served from the same host as the api.
 
-If you want to access the api from a client that is serverd from a different host, including e.g. a development live reloading server with below demo client, you must enable CORS on the server first by setting environment variable _ENABLE_CORS=true_ on the server to allow api connections from clients serverd by other hosts.
+If you want to access the api from a client that is served from a different host, including e.g. a development live reloading server with below demo client, you must enable CORS on the server first by setting environment variable _ENABLE_CORS=true_ on the server to allow api connections from clients served by other hosts.
 
 #### Demo client application
 

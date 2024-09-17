@@ -4,6 +4,7 @@ package database
 import (
 	"context"
 	"database/sql"
+	"fmt"
 
 	"github.com/spf13/viper"
 	"github.com/uptrace/bun"
@@ -14,11 +15,10 @@ import (
 
 // DBConn returns a postgres connection pool.
 func DBConn() (*bun.DB, error) {
-	viper.SetDefault("db_network", "tcp")
-	viper.SetDefault("db_addr", "localhost:5432")
-	viper.SetDefault("db_user", "postgres")
-	viper.SetDefault("db_password", "postgres")
-	viper.SetDefault("db_database", "postgres")
+	viper.SetConfigFile("./settings.env")
+	if err := viper.ReadInConfig(); err != nil {
+		panic(fmt.Errorf("fatal error config file: %w", err))
+	}
 
 	dsn := "postgres://" + viper.GetString("db_user") + ":" + viper.GetString("db_password") + "@" + viper.GetString("db_addr") + "/" + viper.GetString("db_database") + "?sslmode=disable"
 

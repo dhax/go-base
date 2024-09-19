@@ -5,7 +5,7 @@ package pwdless
 import (
 	"fmt"
 	"net/http"
-	"path"
+	"net/url"
 	"strings"
 	"time"
 
@@ -123,12 +123,13 @@ func (rs *Resource) login(w http.ResponseWriter, r *http.Request) {
 	}
 
 	lt := rs.LoginAuth.CreateToken(acc.ID)
+	tokenURL, _ := url.JoinPath(rs.LoginAuth.loginURL, lt.Token)
 
 	go func() {
 		content := email.ContentLoginToken{
 			Email:  acc.Email,
 			Name:   acc.Name,
-			URL:    path.Join(rs.LoginAuth.loginURL, lt.Token),
+			URL:    tokenURL,
 			Token:  lt.Token,
 			Expiry: lt.Expiry,
 		}

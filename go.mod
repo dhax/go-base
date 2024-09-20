@@ -15,7 +15,6 @@ require (
 	github.com/gofrs/uuid v4.4.0+incompatible
 	github.com/jaytaylor/html2text v0.0.0-20230321000545-74c2419ad056
 	github.com/lestrrat-go/jwx/v2 v2.0.13
-	github.com/mitchellh/go-homedir v1.1.0
 	github.com/mssola/user_agent v0.6.0
 	github.com/sirupsen/logrus v1.9.3
 	github.com/spf13/cobra v1.7.0

@@ -14,13 +14,9 @@ import (
 
 // DBConn returns a postgres connection pool.
 func DBConn() (*bun.DB, error) {
-	viper.SetDefault("db_network", "tcp")
-	viper.SetDefault("db_addr", "localhost:5432")
-	viper.SetDefault("db_user", "postgres")
-	viper.SetDefault("db_password", "postgres")
-	viper.SetDefault("db_database", "postgres")
+	viper.SetDefault("db_dsn", "postgres://postgres:postgres@localhost:5432/postgres?sslmode=disable")
 
-	dsn := "postgres://" + viper.GetString("db_user") + ":" + viper.GetString("db_password") + "@" + viper.GetString("db_addr") + "/" + viper.GetString("db_database") + "?sslmode=disable"
+	dsn := viper.GetString("db_dsn")
 
 	sqldb := sql.OpenDB(pgdriver.NewConnector(pgdriver.WithDSN(dsn)))
 

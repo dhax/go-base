@@ -16,7 +16,7 @@ The following feature set is a minimal selection of typical Web API requirements
 - CLI features using [cobra](https://github.com/spf13/cobra)
 - PostgreSQL support including migrations using [bun](https://github.com/uptrace/bun)
 - Structured logging with [Logrus](https://github.com/sirupsen/logrus)
-- Routing with [chi router](https://github.com/go-chi/chi) and middleware
+- Routing with [chi router](https://github.com/go-chi/chi) and middleware, following [chi rest example](https://github.com/go-chi/chi/tree/master/_examples/rest)
 - JWT Authentication using [lestrrat-go/jwx](https://github.com/lestrrat-go/jwx) with example passwordless email authentication
 - Request data validation using [ozzo-validation](https://github.com/go-ozzo/ozzo-validation)
 - HTML emails with [go-mail](https://github.com/go-mail/mail)
@@ -27,7 +27,7 @@ The following feature set is a minimal selection of typical Web API requirements
 
 ### Local
 
-- Create a postgres database and set environment variables for your database accordingly if not using below defaults
+- Create a postgres database and adjust environment variables in dev.env
 - Run the application to see available commands: `go run main.go`
 - Run all migrations from database/migrate folder: `go run main.go migrate`
 - Run the application with command _serve_: `go run main.go serve`
@@ -37,6 +37,10 @@ The following feature set is a minimal selection of typical Web API requirements
 - First start the database only: `docker compose up -d postgres`
 - Once initialize the database by running all migrations in database/migrate folder: `docker compose run server ./main migrate`
 - Start the api server: `docker compose up`
+
+### Environment Variables
+
+By default viper will look at dev.env for a config file. It contains the applications defaults if no environment variables are set otherwise.
 
 ## API Routes
 
@@ -53,9 +57,13 @@ For passwordless login following routes are available:
 
 ### Example API
 
-Besides /auth/_the API provides two main routes /api/_ and /admin/\*, as an example to separate application and administration context. The latter requires to be logged in as administrator by providing the respective JWT in Authorization Header.
+The example api follows the patterns from the [chi rest example](https://github.com/go-chi/chi/tree/master/_examples/rest). Besides /auth/_the API provides two main routes /api/_ and /admin/\*, as an example to separate application and administration context. The latter requires to be logged in as administrator by providing the respective JWT in Authorization Header.
 
 Check [routes.md](routes.md) for a generated overview of the provided API routes.
+
+### Testing
+
+Package auth/pwdless contains example api tests using a mocked database. Run them with: `go test -v ./...`
 
 ### Client API Access and CORS
 
@@ -65,7 +73,7 @@ If you want to access the api from a client that is served from a different host
 
 #### Demo client application
 
-For demonstration of the login and account management features this API serves a demo [Vue.js](https://vuejs.org) PWA. The client's source code can be found [here](https://github.com/dhax/go-base-vue). Build and put it into the api's _./public_ folder, or use the live development server (requires CORS enabled).
+For demonstration of the login and account management features this API serves a demo [Vue.js](https://vuejs.org) PWA. The client's source code can be found [here](https://github.com/dhax/go-base-vue). Build and put it into the api's _./public_ folder, or use the live development server (requires ENABLE_CORS environment variable set to true).
 
 Outgoing emails containing the login token will be print to stdout if no valid email smtp settings are provided by environment variables (see table below). If _EMAIL_SMTP_HOST_ is set but the host can not be reached the application will exit immediately at start.
 
@@ -76,34 +84,6 @@ Use one of the following bootstrapped users for login:
 
 TODO: deploy somewhere else...
 A deployed version can also be found on [Heroku](https://govue.herokuapp.com)
-
-### Testing
-
-Package auth/pwdless contains example api tests using a mocked database. Run them with: `go test -v ./...`
-
-### Environment Variables
-
-By default viper will look at ./dev.env for a config file. Setting your config as Environment Variables is recommended as by 12-Factor App.
-
-| Name                    | Type          | Default                     | Description                                                                                                                                                                                               |
-| ----------------------- | ------------- | --------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| PORT                    | string        | localhost:3000              | http address (accepts also port number only for heroku compability)                                                                                                                                       |
-| LOG_LEVEL               | string        | debug                       | log level                                                                                                                                                                                                 |
-| LOG_TEXTLOGGING         | bool          | false                       | defaults to json logging                                                                                                                                                                                  |
-| DB_DSN                 | string        | postgres://postgres:postgres@localhost:5432/postgres?sslmode=disable              | database dsn connection string                                                                                                                                                                       |
-| AUTH_LOGIN_URL          | string        | <http://localhost:3000/login> | client login url as sent in login token email                                                                                                                                                             |
-| AUTH_LOGIN_TOKEN_LENGTH | int           | 8                           | length of login token                                                                                                                                                                                     |
-| AUTH_LOGIN_TOKEN_EXPIRY | time.Duration | 11m                         | login token expiry                                                                                                                                                                                        |
-| AUTH_JWT_SECRET         | string        | random                      | jwt sign and verify key - value "random" creates random 32 char secret at startup (and automatically invalidates existing tokens on app restarts, so during dev you might want to set a fixed value here) |
-| AUTH_JWT_EXPIRY         | time.Duration | 15m                         | jwt access token expiry                                                                                                                                                                                   |
-| AUTH_JWT_REFRESH_EXPIRY | time.Duration | 1h                          | jwt refresh token expiry                                                                                                                                                                                  |
-| EMAIL_SMTP_HOST         | string        |                             | email smtp host (if set and connection can't be established then app exits)                                                                                                                               |
-| EMAIL_SMTP_PORT         | int           |                             | email smtp port                                                                                                                                                                                           |
-| EMAIL_SMTP_USER         | string        |                             | email smtp username                                                                                                                                                                                       |
-| EMAIL_SMTP_PASSWORD     | string        |                             | email smtp password                                                                                                                                                                                       |
-| EMAIL_FROM_ADDRESS      | string        |                             | from address used in sending emails                                                                                                                                                                       |
-| EMAIL_FROM_NAME         | string        |                             | from name used in sending emails                                                                                                                                                                          |
-| ENABLE_CORS             | bool          | false                       | enable CORS requests                                                                                                                                                                                      |
 
 [godoc]: https://godoc.org/github.com/dhax/go-base
 [godoc badge]: https://godoc.org/github.com/dhax/go-base?status.svg

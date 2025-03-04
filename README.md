@@ -55,9 +55,11 @@ For passwordless login following routes are available:
 | /auth/refresh | POST   |               | Authorization: "Bearer refresh_token" | refresh JWTs                                                            |
 | /auth/logout  | POST   |               | Authorizaiton: "Bearer refresh_token" | logout from this device                                                 |
 
+Outgoing emails containing the login token will be printed to stdout if no valid email smtp settings are provided by environment variables (see dev.env). If _EMAIL_SMTP_HOST_ is set but the host can not be reached the application will exit immediately at start.
+
 ### Example API
 
-The example api follows the patterns from the [chi rest example](https://github.com/go-chi/chi/tree/master/_examples/rest). Besides /auth/_the API provides two main routes /api/_ and /admin/\*, as an example to separate application and administration context. The latter requires to be logged in as administrator by providing the respective JWT in Authorization Header.
+The example api follows the patterns from the [chi rest example](https://github.com/go-chi/chi/tree/master/_examples/rest). Besides _/auth_ routes the API provides two main routes for _/api_ and _/admin_ requests, the latter requires to be logged in as administrator by providing the respective JWT in Authorization Header.
 
 Check [routes.md](routes.md) for a generated overview of the provided API routes.
 
@@ -73,17 +75,14 @@ If you want to access the api from a client that is served from a different host
 
 #### Demo client application
 
-For demonstration of the login and account management features this API serves a demo [Vue.js](https://vuejs.org) PWA. The client's source code can be found [here](https://github.com/dhax/go-base-vue). Build and put it into the api's _./public_ folder, or use the live development server (requires ENABLE_CORS environment variable set to true).
+A deployed version can also be found at [go-base.onrender.com](https://go-base.onrender.com) (takes up to 60 seconds to spin up if sleeping...)
 
-Outgoing emails containing the login token will be print to stdout if no valid email smtp settings are provided by environment variables (see table below). If _EMAIL_SMTP_HOST_ is set but the host can not be reached the application will exit immediately at start.
+For demonstration of the login and account management features this API serves a demo [Vue.js](https://vuejs.org) PWA. The client's source code can be found [here](https://github.com/dhax/go-base-vue). Build and put it into the api's _./public_ folder, or use the live development server (requires ENABLE_CORS environment variable set to true).
 
 Use one of the following bootstrapped users for login:
 
 - <admin@example.com> (has access to admin panel)
 - <user@example.com>
-
-TODO: deploy somewhere else...
-A deployed version can also be found on [Heroku](https://govue.herokuapp.com)
 
 [godoc]: https://godoc.org/github.com/dhax/go-base
 [godoc badge]: https://godoc.org/github.com/dhax/go-base?status.svg

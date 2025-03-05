@@ -47,6 +47,7 @@ func (a *API) Router() *chi.Mux {
 
 	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("Hello Admin"))
+		log(r).Debug("admin access")
 	})
 
 	r.Mount("/accounts", a.Accounts.router())

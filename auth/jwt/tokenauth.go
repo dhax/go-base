@@ -65,8 +65,8 @@ func (a *TokenAuth) CreateJWT(c AppClaims) (string, error) {
 	return tokenString, err
 }
 
-func ParseStructToMap(c interface{}) (map[string]interface{}, error) {
-	var claims map[string]interface{}
+func ParseStructToMap(c any) (map[string]any, error) {
+	var claims map[string]any
 	inrec, _ := json.Marshal(c)
 	err := json.Unmarshal(inrec, &claims)
 	if err != nil {

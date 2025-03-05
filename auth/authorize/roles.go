@@ -2,6 +2,7 @@ package authorize
 
 import (
 	"net/http"
+	"slices"
 
 	"github.com/go-chi/render"
 
@@ -24,10 +25,5 @@ func RequiresRole(role string) func(next http.Handler) http.Handler {
 }
 
 func hasRole(role string, roles []string) bool {
-	for _, r := range roles {
-		if r == role {
-			return true
-		}
-	}
-	return false
+	return slices.Contains(roles, role)
 }

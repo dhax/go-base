@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -349,7 +348,7 @@ func testRequest(t *testing.T, ts *httptest.Server, method, path string, body io
 	}
 	defer resp.Body.Close()
 
-	respBody, err := ioutil.ReadAll(resp.Body)
+	respBody, err := io.ReadAll(resp.Body)
 	if err != nil {
 		t.Fatal(err)
 		return nil, ""
@@ -372,7 +371,7 @@ func genRefreshJWT(c jwt.RefreshClaims) string {
 	return tokenString
 }
 
-func encode(v interface{}) (*bytes.Buffer, error) {
+func encode(v any) (*bytes.Buffer, error) {
 	data := new(bytes.Buffer)
 	err := json.NewEncoder(data).Encode(v)
 	return data, err

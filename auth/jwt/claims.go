@@ -20,7 +20,7 @@ type AppClaims struct {
 }
 
 // ParseClaims parses JWT claims into AppClaims.
-func (c *AppClaims) ParseClaims(claims map[string]interface{}) error {
+func (c *AppClaims) ParseClaims(claims map[string]any) error {
 	id, ok := claims["id"]
 	if !ok {
 		return errors.New("could not parse claim id")
@@ -40,7 +40,7 @@ func (c *AppClaims) ParseClaims(claims map[string]interface{}) error {
 
 	var roles []string
 	if rl != nil {
-		for _, v := range rl.([]interface{}) {
+		for _, v := range rl.([]any) {
 			roles = append(roles, v.(string))
 		}
 	}
@@ -57,7 +57,7 @@ type RefreshClaims struct {
 }
 
 // ParseClaims parses the JWT claims into RefreshClaims.
-func (c *RefreshClaims) ParseClaims(claims map[string]interface{}) error {
+func (c *RefreshClaims) ParseClaims(claims map[string]any) error {
 	token, ok := claims["token"]
 	if !ok {
 		return errors.New("could not parse claim token")

@@ -35,12 +35,12 @@ func NewAdmAccountStore(db *bun.DB) *AdmAccountStore {
 type AccountFilter struct {
 	Limit  int
 	Offset int
-	Filter map[string]interface{}
+	Filter map[string]any
 	Order  []string
 }
 
 // NewAccountFilter returns an AccountFilter with options parsed from request url values.
-func NewAccountFilter(params interface{}) (*AccountFilter, error) {
+func NewAccountFilter(params any) (*AccountFilter, error) {
 	v, ok := params.(url.Values)
 	if !ok {
 		return nil, ErrBadParams
@@ -48,7 +48,7 @@ func NewAccountFilter(params interface{}) (*AccountFilter, error) {
 	f := &AccountFilter{
 		Limit:  10, // Default limit
 		Offset: 0,  // Default offset
-		Filter: make(map[string]interface{}),
+		Filter: make(map[string]any),
 		Order:  v["order"],
 	}
 	// Parse limit and offset

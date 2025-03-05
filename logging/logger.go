@@ -12,10 +12,8 @@ import (
 	"github.com/spf13/viper"
 )
 
-var (
-	// Logger is a configured logrus.Logger.
-	Logger *logrus.Logger
-)
+// Logger is a configured logrus.Logger.
+var Logger *logrus.Logger
 
 // StructuredLogger is a structured logrus Logger.
 type StructuredLogger struct {
@@ -90,7 +88,7 @@ type StructuredLoggerEntry struct {
 	Logger logrus.FieldLogger
 }
 
-func (l *StructuredLoggerEntry) Write(status, bytes int, header http.Header, elapsed time.Duration, extra interface{}) {
+func (l *StructuredLoggerEntry) Write(status, bytes int, header http.Header, elapsed time.Duration, extra any) {
 	l.Logger = l.Logger.WithFields(logrus.Fields{
 		"resp_status":       status,
 		"resp_bytes_length": bytes,
@@ -101,7 +99,7 @@ func (l *StructuredLoggerEntry) Write(status, bytes int, header http.Header, ela
 }
 
 // Panic prints stack trace
-func (l *StructuredLoggerEntry) Panic(v interface{}, stack []byte) {
+func (l *StructuredLoggerEntry) Panic(v any, stack []byte) {
 	l.Logger = l.Logger.WithFields(logrus.Fields{
 		"stack": string(stack),
 		"panic": fmt.Sprintf("%+v", v),
@@ -118,14 +116,14 @@ func GetLogEntry(r *http.Request) logrus.FieldLogger {
 }
 
 // LogEntrySetField adds a field to the request scoped logrus.FieldLogger.
-func LogEntrySetField(r *http.Request, key string, value interface{}) {
+func LogEntrySetField(r *http.Request, key string, value any) {
 	if entry, ok := r.Context().Value(middleware.LogEntryCtxKey).(*StructuredLoggerEntry); ok {
 		entry.Logger = entry.Logger.WithField(key, value)
 	}
 }
 
 // LogEntrySetFields adds multiple fields to the request scoped logrus.FieldLogger.
-func LogEntrySetFields(r *http.Request, fields map[string]interface{}) {
+func LogEntrySetFields(r *http.Request, fields map[string]any) {
 	if entry, ok := r.Context().Value(middleware.LogEntryCtxKey).(*StructuredLoggerEntry); ok {
 		entry.Logger = entry.Logger.WithFields(fields)
 	}

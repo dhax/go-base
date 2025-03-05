@@ -1,0 +1,2 @@
+(window["webpackJsonp"]=window["webpackJsonp"]||[]).push([["admin"],{3530:function(n,e,t){"use strict";t.r(e);var u=t("a523"),a=function(){var n=this,e=n._self._c;return e(u["a"],[e("router-view")],1)},r=[],i={},l=i,o=t("2877"),s=Object(o["a"])(l,a,r,!1,null,null,null);e["default"]=s.exports}}]);
+//# sourceMappingURL=admin.94baf9bd.js.map

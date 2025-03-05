@@ -9,9 +9,7 @@ import (
 	"github.com/spf13/viper"
 )
 
-var (
-	errTokenNotFound = errors.New("login token not found")
-)
+var errTokenNotFound = errors.New("login token not found")
 
 // LoginToken is an in-memory saved token referencing an account ID and an expiry date.
 type LoginToken struct {

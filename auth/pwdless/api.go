@@ -33,21 +33,16 @@ type AuthStorer interface {
 	PurgeExpiredToken() error
 }
 
-// Mailer defines methods to send account emails.
-type Mailer interface {
-	LoginToken(name, email string, c email.ContentLoginToken) error
-}
-
 // Resource implements passwordless account authentication against a database.
 type Resource struct {
 	LoginAuth *LoginTokenAuth
 	TokenAuth *jwt.TokenAuth
 	Store     AuthStorer
-	Mailer    Mailer
+	Mailer    email.Mailer
 }
 
 // NewResource returns a configured authentication resource.
-func NewResource(authStore AuthStorer, mailer Mailer) (*Resource, error) {
+func NewResource(authStore AuthStorer, mailer email.Mailer) (*Resource, error) {
 	loginAuth, err := NewLoginTokenAuth()
 	if err != nil {
 		return nil, err
@@ -126,14 +121,17 @@ func (rs *Resource) login(w http.ResponseWriter, r *http.Request) {
 	tokenURL, _ := url.JoinPath(rs.LoginAuth.loginURL, lt.Token)
 
 	go func() {
-		content := email.ContentLoginToken{
+		content := ContentLoginToken{
 			Email:  acc.Email,
 			Name:   acc.Name,
 			URL:    tokenURL,
 			Token:  lt.Token,
 			Expiry: lt.Expiry,
 		}
-		if err := rs.Mailer.LoginToken(acc.Name, acc.Email, content); err != nil {
+
+		msg := LoginTokenEmail(acc.Name, acc.Email, content)
+
+		if err := rs.Mailer.Send(msg); err != nil {
 			log(r).WithField("module", "email").Error(err)
 		}
 	}()

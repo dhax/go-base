@@ -24,7 +24,7 @@ import (
 var (
 	auth      *Resource
 	authStore MockAuthStore
-	mailer    email.MockMailer
+	mailer    *email.MockMailer
 	ts        *httptest.Server
 )
 
@@ -35,7 +35,9 @@ func TestMain(m *testing.M) {
 	viper.SetDefault("log_level", "error")
 
 	var err error
-	auth, err = NewResource(&authStore, &mailer)
+
+	mailer = email.NewMockMailer()
+	auth, err = NewResource(&authStore, mailer)
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
@@ -72,10 +74,6 @@ func TestAuthResource_login(t *testing.T) {
 		return &a, err
 	}
 
-	mailer.LoginTokenFn = func(n, e string, c email.ContentLoginToken) error {
-		return nil
-	}
-
 	tests := []struct {
 		name   string
 		email  string
@@ -105,11 +103,11 @@ func TestAuthResource_login(t *testing.T) {
 			if tc.err == ErrInvalidLogin && authStore.GetAccountByEmailInvoked {
 				t.Error("GetByLoginToken invoked for invalid email")
 			}
-			if tc.err == nil && !mailer.LoginTokenInvoked {
-				t.Error("emailService.LoginToken not invoked")
+			if tc.err == nil && !mailer.SendInvoked {
+				t.Error("emailService.Send not invoked")
 			}
 			authStore.GetAccountByEmailInvoked = false
-			mailer.LoginTokenInvoked = false
+			mailer.SendInvoked = false
 		})
 	}
 }

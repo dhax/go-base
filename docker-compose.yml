@@ -14,7 +14,7 @@ services:
       #AUTH_JWT_EXPIRY: 1h
       #AUTH_JWT_REFRESH_EXPIRY: 72h
       #AUTH_JWT_SECRET: my secret
-      #EMAIL_FROM_ADDRESS: go-base
+      #EMAIL_FROM_ADDRESS: go-base@example.com
       #EMAIL_FROM_NAME: Go Base
       #EMAIL_SMTP_HOST:
       #EMAIL_SMTP_PORT: 465

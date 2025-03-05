@@ -78,8 +78,8 @@ func New(enableCORS bool) (*chi.Mux, error) {
 		r.Mount("/api", appAPI.Router())
 	})
 
-	r.Get("/ping", func(w http.ResponseWriter, _ *http.Request) {
-		w.Write([]byte("pong"))
+	r.Get("/healthz", func(w http.ResponseWriter, _ *http.Request) {
+		w.Write([]byte("ok"))
 	})
 
 	r.Get("/*", SPAHandler("public"))

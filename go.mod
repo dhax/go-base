@@ -1,6 +1,8 @@
 module github.com/dhax/go-base
 
-go 1.23
+go 1.23.0
+
+toolchain go1.24.1
 
 require (
 	github.com/go-chi/chi/v5 v5.2.0
@@ -8,7 +10,6 @@ require (
 	github.com/go-chi/docgen v1.3.0
 	github.com/go-chi/jwtauth/v5 v5.3.2
 	github.com/go-chi/render v1.0.3
-	github.com/go-mail/mail v2.3.1+incompatible
 	github.com/go-ozzo/ozzo-validation v3.6.0+incompatible
 	github.com/gofrs/uuid v4.4.0+incompatible
 	github.com/jaytaylor/html2text v0.0.0-20230321000545-74c2419ad056
@@ -22,6 +23,7 @@ require (
 	github.com/uptrace/bun/driver/pgdriver v1.2.7
 	github.com/uptrace/bun/extra/bundebug v1.2.7
 	github.com/vanng822/go-premailer v1.22.0
+	github.com/wneessen/go-mail v0.6.2
 )
 
 require (
@@ -65,14 +67,12 @@ require (
 	github.com/vmihailenco/msgpack/v5 v5.4.1 // indirect
 	github.com/vmihailenco/tagparser/v2 v2.0.0 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
-	golang.org/x/crypto v0.31.0 // indirect
+	golang.org/x/crypto v0.36.0 // indirect
 	golang.org/x/exp v0.0.0-20241217172543-b2144cdd0a67 // indirect
 	golang.org/x/net v0.33.0 // indirect
-	golang.org/x/sys v0.28.0 // indirect
-	golang.org/x/text v0.21.0 // indirect
-	gopkg.in/alexcesaro/quotedprintable.v3 v3.0.0-20150716171945-2caba252f4dc // indirect
+	golang.org/x/sys v0.31.0 // indirect
+	golang.org/x/text v0.23.0 // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
-	gopkg.in/mail.v2 v2.3.1 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 	mellium.im/sasl v0.3.2 // indirect
 )

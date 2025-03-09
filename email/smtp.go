@@ -1,13 +1,13 @@
 package email
 
 import (
-	"github.com/go-mail/mail"
 	"github.com/spf13/viper"
+	"github.com/wneessen/go-mail"
 )
 
 // SMTPMailer is a SMTP mailer.
 type SMTPMailer struct {
-	client *mail.Dialer
+	client *mail.Client
 	from   Email
 }
 
@@ -33,17 +33,17 @@ func NewMailer() (Mailer, error) {
 		return NewMockMailer(), nil
 	}
 
+	client, err := mail.NewClient(smtp.Host, mail.WithPort(smtp.Port),
+		mail.WithSMTPAuth(mail.SMTPAuthPlain),
+		mail.WithUsername(smtp.User), mail.WithPassword(smtp.Password))
+	if err != nil {
+		return nil, err
+	}
 	s := &SMTPMailer{
-		client: mail.NewDialer(smtp.Host, smtp.Port, smtp.User, smtp.Password),
+		client: client,
 		from:   NewEmail(viper.GetString("email_from_name"), viper.GetString("email_from_address")),
 	}
-
-	d, err := s.client.Dial()
-	if err == nil {
-		d.Close()
-		return s, nil
-	}
-	return nil, err
+	return s, nil
 }
 
 // Send sends the mail via smtp.
@@ -52,12 +52,12 @@ func (m *SMTPMailer) Send(email Message) error {
 		return err
 	}
 
-	msg := mail.NewMessage()
-	msg.SetAddressHeader("From", email.From.Address, email.From.Name)
-	msg.SetAddressHeader("To", email.To.Address, email.To.Name)
-	msg.SetHeader("Subject", email.Subject)
-	msg.SetBody("text/plain", email.text)
-	msg.AddAlternative("text/html", email.html)
+	msg := mail.NewMsg()
+	msg.SetAddrHeader("From", email.From.Address, email.From.Name)
+	msg.SetAddrHeader("To", email.To.Address, email.To.Name)
+	msg.Subject(email.Subject)
+	msg.SetBodyString("text/plain", email.text)
+	msg.SetBodyString("text/html", email.html)
 
 	return m.client.DialAndSend(msg)
 }

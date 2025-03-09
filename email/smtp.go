@@ -56,8 +56,8 @@ func (m *SMTPMailer) Send(email Message) error {
 	msg.SetAddrHeader("From", email.From.Address, email.From.Name)
 	msg.SetAddrHeader("To", email.To.Address, email.To.Name)
 	msg.Subject(email.Subject)
-	msg.SetBodyString("text/plain", email.text)
-	msg.SetBodyString("text/html", email.html)
+	msg.SetBodyString(mail.TypeTextPlain, email.text)
+	msg.AddAlternativeString(mail.TypeTextHTML, email.html)
 
 	return m.client.DialAndSend(msg)
 }

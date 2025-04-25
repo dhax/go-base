@@ -75,9 +75,9 @@ If you want to access the api from a client that is served from a different host
 
 #### Demo client application
 
-A deployed version can also be found at [go-base.onrender.com](https://go-base.onrender.com) (takes up to 60 seconds to spin up if sleeping...)
+A deployed demo version can also be found at [https://go-base.leapcell.app/](https://go-base.leapcell.app/)
 
-For demonstration of the login and account management features this API serves a demo [Vue.js](https://vuejs.org) PWA. The client's source code can be found [here](https://github.com/dhax/go-base-vue). Build and put it into the api's _./public_ folder, or use the live development server (requires ENABLE_CORS environment variable set to true).
+For demonstration of the login and account management features this API serves a demo [Vue.js](https://vuejs.org) PWA. It's source code can be found [here](https://github.com/dhax/go-base-vue). You can build and put it into the api's _./public_ folder, or use the live development server (requires ENABLE_CORS environment variable set to true).
 
 Use one of the following bootstrapped users for login:
 

@@ -19,9 +19,9 @@ require (
 	github.com/spf13/cobra v1.8.1
 	github.com/spf13/viper v1.19.0
 	github.com/uptrace/bun v1.2.15
-	github.com/uptrace/bun/dialect/pgdialect v1.2.7
+	github.com/uptrace/bun/dialect/pgdialect v1.2.15
 	github.com/uptrace/bun/driver/pgdriver v1.2.15
-	github.com/uptrace/bun/extra/bundebug v1.2.7
+	github.com/uptrace/bun/extra/bundebug v1.2.15
 	github.com/vanng822/go-premailer v1.22.0
 	github.com/wneessen/go-mail v0.6.2
 )

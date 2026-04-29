@@ -1,5 +1,9 @@
 run-name: main workflow
-on: 
+permissions:
+  contents: read
+  packages: read
+
+on:
   push:
     branches:
       - main
@@ -15,9 +19,9 @@ defaults:
     shell: bash
 
 jobs:
-  pre: 
+  pre:
     uses: ./.github/workflows/pre.yml
-  deps: 
+  deps:
     needs: pre
     uses: ./.github/workflows/dependencies.yml
   lint:
@@ -32,3 +36,4 @@ jobs:
   deploy:
     needs: build
     uses: ./.github/workflows/deployment.yml
+

@@ -13,3 +13,6 @@ jobs:
         uses: ./.github/actions/setup-go-and-deps
       - name: test
         run: go test -v ./...
+        env:
+          AUTH_JWT_SECRET: 12345678901234567890123456789012
+

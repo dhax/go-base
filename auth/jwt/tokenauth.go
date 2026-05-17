@@ -20,12 +20,12 @@ type TokenAuth struct {
 func NewTokenAuth() (*TokenAuth, error) {
 	secret := viper.GetString("auth_jwt_secret")
 	knownWeakSecrets := map[string]bool{
-		"":          true,
-		"random":    true,
-		"CHANGE-ME": true,
-		"secret":    true,
-		"changeme":  true,
-		"jwt_secret": true,
+		"":                true,
+		"random":          true,
+		"CHANGE-ME":       true,
+		"secret":          true,
+		"changeme":        true,
+		"jwt_secret":      true,
 		"your-secret-key": true,
 	}
 	if knownWeakSecrets[secret] {

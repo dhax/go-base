@@ -1,7 +1,6 @@
 package jwt
 
 import (
-	"crypto/rand"
 	"encoding/json"
 	"net/http"
 	"time"
@@ -20,8 +19,20 @@ type TokenAuth struct {
 // NewTokenAuth configures and returns a JWT authentication instance.
 func NewTokenAuth() (*TokenAuth, error) {
 	secret := viper.GetString("auth_jwt_secret")
-	if secret == "random" {
-		secret = randStringBytes(32)
+	knownWeakSecrets := map[string]bool{
+		"":          true,
+		"random":    true,
+		"CHANGE-ME": true,
+		"secret":    true,
+		"changeme":  true,
+		"jwt_secret": true,
+		"your-secret-key": true,
+	}
+	if knownWeakSecrets[secret] {
+		return nil, ErrWeakSecret
+	}
+	if len(secret) < 32 {
+		return nil, ErrSecretTooShort
 	}
 
 	a := &TokenAuth{
@@ -88,18 +99,4 @@ func (a *TokenAuth) CreateRefreshJWT(c RefreshClaims) (string, error) {
 
 	_, tokenString, err := a.JwtAuth.Encode(claims)
 	return tokenString, err
-}
-
-const letterBytes = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
-
-func randStringBytes(n int) string {
-	buf := make([]byte, n)
-	if _, err := rand.Read(buf); err != nil {
-		panic(err)
-	}
-
-	for k, v := range buf {
-		buf[k] = letterBytes[v%byte(len(letterBytes))]
-	}
-	return string(buf)
 }

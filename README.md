@@ -27,13 +27,14 @@ The following feature set is a minimal selection of typical Web API requirements
 
 ### Local
 
-- Create a postgres database and adjust environment variables in dev.env
+- Create a postgres database and adjust environment variables in dev.env, especially you need to change the default AUTH_JWT_SECRET
 - Run the application to see available commands: `go run main.go`
 - Run all migrations from database/migrate folder: `go run main.go migrate`
 - Run the application with command _serve_: `go run main.go serve`
 
 ### Using Docker Compose
 
+- Change the default AUTH_JWT_SECRET env var in docker-compose.yml
 - First start the database only: `docker compose up -d postgres`
 - Once initialize the database by running all migrations in database/migrate folder: `docker compose run server ./main migrate`
 - Start the api server: `docker compose up`

@@ -13,7 +13,7 @@ var (
 	ErrTokenExpired        = errors.New("token expired")
 	ErrInvalidAccessToken  = errors.New("invalid access token")
 	ErrInvalidRefreshToken = errors.New("invalid refresh token")
-	ErrWeakSecret          = errors.New("JWT secret uses a known default value — set AUTH_JWT_SECRET in dev.env: openssl rand -base64 64")
+	ErrWeakSecret          = errors.New("JWT secret uses a known default value — set AUTH_JWT_SECRET: openssl rand -base64 64")
 	ErrSecretTooShort      = errors.New("JWT secret is too short — must be at least 32 characters")
 )
 

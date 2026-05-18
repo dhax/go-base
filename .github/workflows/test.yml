@@ -12,5 +12,6 @@ jobs:
       - name: Go and dependencies
         uses: ./.github/actions/setup-go-and-deps
       - name: test
-        run: AUTH_JWT_SECRET=12345678901234567890123456789012 go test -v ./...
-
+        run: go test -v ./...
+        env:
+          AUTH_JWT_SECRET: OjOHjJs1VvhuzIWqttTtNh7Y81xKgDatiopCUKMoKL0StwMb/LsBQLJ+AM6zq6WbherxmJGtPncQ3OsWPHdOTw==

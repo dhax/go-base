@@ -52,37 +52,32 @@ func (a *LoginTokenAuth) CreateToken(id int) LoginToken {
 
 // GetAccountID looks up the token by tokenstring and returns the account ID or error if token not found or expired.
 func (a *LoginTokenAuth) GetAccountID(token string) (int, error) {
-	lt, exists := a.get(token)
+	a.mux.Lock()
+	defer a.mux.Unlock()
+
+	lt, exists := a.token[token]
 	if !exists || time.Now().After(lt.Expiry) {
 		return 0, errTokenNotFound
 	}
-	a.delete(lt.Token)
-	return lt.AccountID, nil
-}
 
-func (a *LoginTokenAuth) get(token string) (LoginToken, bool) {
-	a.mux.RLock()
-	lt, ok := a.token[token]
-	a.mux.RUnlock()
-	return lt, ok
+	delete(a.token, token)
+	return lt.AccountID, nil
 }
 
 func (a *LoginTokenAuth) add(lt LoginToken) {
 	a.mux.Lock()
-	a.token[lt.Token] = lt
-	a.mux.Unlock()
-}
+	defer a.mux.Unlock()
 
-func (a *LoginTokenAuth) delete(token string) {
-	a.mux.Lock()
-	delete(a.token, token)
-	a.mux.Unlock()
+	a.token[lt.Token] = lt
 }
 
 func (a *LoginTokenAuth) purgeExpired() {
+	a.mux.Lock()
+	defer a.mux.Unlock()
+
 	for t, v := range a.token {
 		if time.Now().After(v.Expiry) {
-			a.delete(t)
+			delete(a.token, t)
 		}
 	}
 }

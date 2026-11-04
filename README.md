@@ -78,8 +78,5 @@ If you want to access the api from a client that is served from a different host
 
 A (now archived) demo [Vue.js](https://vuejs.org) PWA client's source code can be found [here](https://github.com/dhax/go-base-vue). You can build and put it into the api's _./public_ folder, or use the live development server (requires ENABLE_CORS environment variable set to true).
 
-## Referral
-This is a very basic template to get you started. If you are looking for a similar style but more complete and production-ready boilerplate you might want to have a look at [goilerplate (affiliate link)](https://goilerplate.com/?atp=dhax).
-
 [godoc]: https://godoc.org/github.com/dhax/go-base
 [godoc badge]: https://godoc.org/github.com/dhax/go-base?status.svg

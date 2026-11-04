@@ -27,25 +27,25 @@ The following feature set is a minimal selection of typical Web API requirements
 
 ### Local
 
-- Create a postgres database and adjust environment variables in dev.env, especially you need to change the default AUTH_JWT_SECRET
+- Create a postgres database
+- Copy `.env.example` to `.env` and adjust, especially set a default AUTH_JWT_SECRET
 - Run the application to see available commands: `go run main.go`
 - Run all migrations from database/migrate folder: `go run main.go migrate`
 - Run the application with command _serve_: `go run main.go serve`
 
 ### Using Docker Compose
 
-- Change the default AUTH_JWT_SECRET env var in docker-compose.yml
+- Change the default AUTH_JWT_SECRET environment variable in docker-compose.yml
 - First start the database only: `docker compose up -d postgres`
 - Once initialize the database by running all migrations in database/migrate folder: `docker compose run server ./main migrate`
 - Start the api server: `docker compose up`
 
-### Environment Variables
-
-By default viper will look at dev.env for a config file. It contains the applications defaults if no environment variables are set otherwise.
-
 ## API Routes
 
 ### Authentication
+
+During development if no valid email smtp settings are provided by configuration outgoing emails containing the login token will be printed to terminal's stdout.
+If _EMAIL_SMTP_HOST_ is set but cannot be reached the application will exit immediately at start.
 
 For passwordless login following routes are available:
 
@@ -55,8 +55,6 @@ For passwordless login following routes are available:
 | /auth/token   | POST   | token         |                                       | the token you received via email (or printed to stdout if smtp not set) |
 | /auth/refresh | POST   |               | Authorization: "Bearer refresh_token" | refresh JWTs                                                            |
 | /auth/logout  | POST   |               | Authorizaiton: "Bearer refresh_token" | logout from this device                                                 |
-
-Outgoing emails containing the login token will be printed to stdout if no valid email smtp settings are provided by environment variables (see dev.env). If _EMAIL_SMTP_HOST_ is set but the host can not be reached the application will exit immediately at start.
 
 ### Example API
 

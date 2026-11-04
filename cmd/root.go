@@ -1,3 +1,4 @@
+// Package cmd provides application commands
 package cmd
 
 import (
@@ -37,7 +38,9 @@ func init() {
 	// will be global for your application.
 	RootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is ./dev.env")
 	RootCmd.PersistentFlags().Bool("db_debug", false, "log sql to console")
-	viper.BindPFlag("db_debug", RootCmd.PersistentFlags().Lookup("db_debug"))
+	if err := viper.BindPFlag("db_debug", RootCmd.PersistentFlags().Lookup("db_debug")); err != nil {
+		fmt.Println(err)
+	}
 
 	// Cobra also supports local flags, which will only run
 	// when this action is called directly.
@@ -50,9 +53,7 @@ func initConfig() {
 		// Use config file from the flag.
 		viper.SetConfigFile(cfgFile)
 	} else {
-		viper.AddConfigPath(".")
-		viper.SetConfigName("dev")
-		viper.SetConfigType("env")
+		viper.SetConfigFile(".env")
 	}
 
 	viper.AutomaticEnv() // read in environment variables that match
